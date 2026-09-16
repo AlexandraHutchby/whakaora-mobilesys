@@ -1,11 +1,13 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "allowJs": false,
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "jsx": "react-native",
-    "customConditions": ["react-native"],
+    "customConditions": [
+      "react-native"
+    ],
     "module": "esnext",
     "moduleResolution": "bundler",
     "strict": true,
@@ -20,10 +22,13 @@
     ],
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@assets/*": ["./assets/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@assets/*": [
+        "./assets/*"
+      ]
     },
     "typeRoots": [
       "./node_modules/@types",

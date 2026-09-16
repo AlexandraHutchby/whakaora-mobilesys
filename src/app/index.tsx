@@ -1,5 +1,5 @@
-import { WelcomeScreen } from "@/screens/WelcomeScreen"
+import MyMedsScreen from "../presentation/screens/myMedsScreen";
 
 export default function Index() {
-  return <WelcomeScreen />
+  return <MyMedsScreen />;
 }
