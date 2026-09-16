@@ -6,9 +6,6 @@ const MyMedsScreen = () => {
     const medsList = [
         { name: "Edit Medications", dosage: "2 puffs daily" },
         { name: "Edit Schedule", dosage: "1 tablet daily" },
-        { name: "Update Tracker", dosage: "As needed" },
-        { name: "Edit Combinations", dosage: "See notes" },
-        { name: "Edit Food Timings", dosage: "With meals" },
     ];
 
     return (
