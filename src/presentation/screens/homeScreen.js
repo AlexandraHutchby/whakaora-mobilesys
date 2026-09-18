@@ -1,20 +1,21 @@
+import { router } from "expo-router";
 import React from "react";
 import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, } from "react-native";
 
 
 const HomeScreen = () => {
     const menuItems = [
-        'Edit Medications',
-        'Edit Schedule',
-        'Update Tracker',
-        'Edit Combinations',
-        'Edit Food Timings',
+        { label: 'Edit Medications', screen: 'myMeds' },
+        { label: 'Edit Schedule', screen: 'schedule' },
+        { label: 'Update Tracker', screen: 'tracker' },
+        { label: 'Edit Combinations', screen: 'combination' },
+        { label: 'Edit Food Timings', screen: 'foodTimings' },
     ];
 
     return (
         <SafeAreaView style={styles.container}>
             {/** Back Arrow */}
-            <TouchableOpacity style={styles.backButton} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.backButton} activeOpacity={0.7} onPress={() => router.back()}>
                 <Image
                     source={require("../../../assets/icons/back.png")}
                     style={styles.backIcon}
@@ -27,13 +28,15 @@ const HomeScreen = () => {
 
             {/** Menu buttons */}
             <View style={styles.menuContainer}>
-                {menuItems.map((item, index) => (
+                {menuItems.map((item) => (
                     <TouchableOpacity
-                        key={index}
+                        key={item.screen}
                         style={styles.button}
-                        onPress={() => { }}
+                        onPress={() =>
+                            router.push(`/screen?screen=${encodeURIComponent(item.screen)}`)
+                        }
                     >
-                        <Text style={styles.buttonText}>{item}</Text>
+                        <Text style={styles.buttonText}>{item.label}</Text>
                     </TouchableOpacity>
                 ))}
             </View>

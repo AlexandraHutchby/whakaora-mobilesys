@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import React from "react";
 import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, } from "react-native";
 
@@ -11,7 +12,7 @@ const FinderScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
             {/** Back Arrow */}
-            <TouchableOpacity style={styles.backButton} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.backButton} activeOpacity={0.7} onPress={() => router.back}>
                 <Image
                     source={require("../../../assets/icons/back.png")}
                     style={styles.backIcon}

@@ -1,17 +1,15 @@
 import React from "react";
 import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, } from "react-native";
-
+import { router } from "expo-router";
+//import { useMedicationList } from "../hooks/useMedicationList";
 
 const MyMedsScreen = () => {
-    const medsList = [
-        { name: "Edit Medications", dosage: "2 puffs daily" },
-        { name: "Edit Schedule", dosage: "1 tablet daily" },
-    ];
+    //const { medications, deleteMedication } = useMedicationList();
 
     return (
         <SafeAreaView style={styles.container}>
             {/** Back Arrow */}
-            <TouchableOpacity style={styles.backButton} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.backButton} activeOpacity={0.7} onPress={() => router.back()}>
                 <Image
                     source={require("../../../assets/icons/back.png")}
                     style={styles.backIcon}
@@ -24,9 +22,9 @@ const MyMedsScreen = () => {
 
             {/** Meds List */}
             <View style={styles.medsContainer}>
-                {medsList.map((item, index) => (
-                    <View key={index} style={styles.row}>
-                        <TouchableOpacity style={styles.deleteButton}>
+                {medications.map((med) => (
+                    <View key={med.id} style={styles.row}>
+                        <TouchableOpacity style={styles.deleteButton} onPress={() => deleteMedication(med.id)}>
                             <Image
                                 source={require("../../../assets/icons/x.png")}
                                 style={styles.deleteIcon}
@@ -35,17 +33,17 @@ const MyMedsScreen = () => {
                         </TouchableOpacity>
 
                         <View style={styles.medInfo}>
-                            <Text style={styles.medName}>{item.name}</Text>
-                            <Text style={styles.medDosage}>{item.dosage}</Text>
+                            <Text style={styles.medName}>{med.medicationName}</Text>
+                            <Text style={styles.medDosage}>{med.dosage ?? "No dosage set"}</Text>
                         </View>
-                        <TouchableOpacity style={styles.editutton}>
+                        <TouchableOpacity style={styles.editutton} onPress={() => router.push(`/med`)}>
                             <Text style={styles.editIcon}>✎</Text>
                         </TouchableOpacity>
                     </View>
                 ))}
 
                 {/** Add a new medication */}
-                <TouchableOpacity style={styles.addRow}>
+                <TouchableOpacity style={styles.addRow} onPress={() => router.push("/finder")}>
                     <Text style={styles.addIcon}>+</Text>
                 </TouchableOpacity>
             </View>

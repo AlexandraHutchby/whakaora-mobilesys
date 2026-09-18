@@ -14,7 +14,7 @@ export type UserMedicationUpdate = Partial<NewUserMedication>;
 
 export function addUserMedication(data: NewUserMedication): number {
     const result = db.execute(
-        `INSERT INTO userMedication (medicationReferenceId, medicaitonName) 
+        `INSERT INTO userMedication (medicationReferenceId, medicationName) 
         VALUES (?,?)`,
         [data.medicationReferenceId, data.medicationName]
     );
