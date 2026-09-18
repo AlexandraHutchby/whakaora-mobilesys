@@ -1,48 +1,55 @@
-import { useLocalSearchParams } from "expo-router";
+/* eslint-disable no-restricted-imports */
+import React from "react"
+import { useLocalSearchParams, usePathname, useSegments } from "expo-router"
 
-import HomeScreen from "@/presentation/screens/homeScreen";
-import MyMedScreen from "@/presentation/screens/myMedsScreen";
-import FinderScreen from "@/presentation/screens/finderScreen";
-import CombinationScreen from "@/presentation/screens/combinationScreen";
-import ScheduleScreen from "@/presentation/screens/scheduleScreen";
-import TrackerScreen from "@/presentation/screens/trackerScreen";
-import FoodTimingsScreen from "@/presentation/screens/foodTimingsScreen";
-import CameraScreen from "@/presentation/screens/cameraScreen";
-import CommonUseSearchScreen from "@/presentation/screens/commonUseSearchScreen";
-import LoginScreen from "@/presentation/screens/loginScreen";
-import ManualSearchScreen from "@/presentation/screens/manualSearch";
-import MedScreen from "@/presentation/screens/medScreen";
-import React from "react";
+import CameraScreen from "@/presentation/screens/cameraScreen"
+import CombinationScreen from "@/presentation/screens/combinationScreen"
+import CommonUseSearchScreen from "@/presentation/screens/commonUseSearchScreen"
+import FinderScreen from "@/presentation/screens/finderScreen"
+import FoodTimingsScreen from "@/presentation/screens/foodTimingsScreen"
+import HomeScreen from "@/presentation/screens/homeScreen"
+import LoginScreen from "@/presentation/screens/loginScreen"
+import ManualSearchScreen from "@/presentation/screens/manualSearch"
+import MedScreen from "@/presentation/screens/medScreen"
+import MyMedScreen from "@/presentation/screens/myMedsScreen"
+import ScheduleScreen from "@/presentation/screens/scheduleScreen"
+import TrackerScreen from "@/presentation/screens/trackerScreen"
 
 const screenRegistry: Record<string, React.ComponentType> = {
-    myMeds: MyMedScreen,
-    finder: FinderScreen,
-    combination: CombinationScreen,
-    schedule: ScheduleScreen,
-    tracker: TrackerScreen,
-    foodTimings: FoodTimingsScreen,
-    home: HomeScreen,
-    camera: CameraScreen,
-    commonUseSearch: CommonUseSearchScreen,
-    login: LoginScreen,
-    manualSearch: ManualSearchScreen,
-    med: MedScreen,
-};
+  myMeds: MyMedScreen,
+  finder: FinderScreen,
+  combination: CombinationScreen,
+  schedule: ScheduleScreen,
+  tracker: TrackerScreen,
+  foodTimings: FoodTimingsScreen,
+  home: HomeScreen,
+  camera: CameraScreen,
+  commonUseSearch: CommonUseSearchScreen,
+  login: LoginScreen,
+  manualSearch: ManualSearchScreen,
+  med: MedScreen,
+}
 
 export default function Screens() {
-    const params = useLocalSearchParams<{ screen?: string | string[] }>();
-    const screenName = Array.isArray(params.screen)
-        ? params.screen[0]
-        : params.screen || "home";
+  console.log("SCREEN.tsx is running")
+  const params = useLocalSearchParams<{ destination?: string | string[] }>()
+  const screenName = Array.isArray(params.destination)
+    ? params.destination[0]
+    : params.destination || "home"
 
-    console.log("Screen parameter:", params.screen);
-    console.log("Selected screen:", screenName);
+  const pathname = usePathname()
+  const segments = useSegments()
 
-    const ScreenComponent = screenRegistry[screenName];
+  console.log("Screen parameter:", params.destination)
+  console.log("Selected screen:", screenName)
+  console.log("Pathname:", pathname)
+  console.log("Segments:", segments)
 
-    if (!ScreenComponent) {
-        return <HomeScreen />;
-    }
+  const ScreenComponent = screenRegistry[screenName]
 
-    return <ScreenComponent />;
+  if (!ScreenComponent) {
+    return <HomeScreen />
+  }
+
+  return <ScreenComponent />
 }
