@@ -1,7 +1,7 @@
-import db from "./database";
+import db from "./database"
 
 export function initialiseDatabase() {
-    db.execute(`
+  db.execute(`
         CREATE TABLE IF NOT EXISTS medicationReference (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             medicationName TEXT NOT NULL,
@@ -12,27 +12,27 @@ export function initialiseDatabase() {
             sideEffects TEXT,
             patientAdvice TEXT
         );
-    `);
+    `)
 
-    db.execute(`
+  db.execute(`
         CREATE TABLE IF NOT EXISTS userMedication (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             medicationReferenceId INTEGER,
             medicationName TEXT NOT NULL,
             FOREIGN KEY (medicationReferenceId) REFERENCES medicationReference(id)
         );
-    `);
+    `)
 
-    db.execute(`
+  db.execute(`
         CREATE TABLE IF NOT EXISTS mealSchedule (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             mealType TEXT NOT NULL,
             scheduledTime TEXT,
             enabled INTEGER NOT NULL
         );
-    `);
+    `)
 
-    db.execute(`
+  db.execute(`
         CREATE TABLE IF NOT EXISTS medicationSchedule (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             userMedicationId INTEGER NOT NULL,
@@ -47,9 +47,9 @@ export function initialiseDatabase() {
             enabled TEXT NOT NULL,
             FOREIGN KEY(userMedicationId) REFERENCES userMedication(id)
         );
-    `);
+    `)
 
-    db.execute(`
+  db.execute(`
         CREATE TABLE IF NOT EXISTS reminder (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             scheduleId INTEGER NOT NULL,
@@ -59,9 +59,9 @@ export function initialiseDatabase() {
             snoozeDuration INTEGER,
             FOREIGN KEY (scheduleId) REFERENCES medicationSchedule(id)
         );
-    `);
+    `)
 
-    db.execute(`
+  db.execute(`
         CREATE TABLE IF NOT EXISTS prescription (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             userMedicationId INTEGER NOT NULL,
@@ -73,9 +73,9 @@ export function initialiseDatabase() {
             status INTEGER NOT NULL,
             FOREIGN KEY (userMedicationId) REFERENCES userMedication(id)
         );
-    `);
+    `)
 
-    db.execute(`
+  db.execute(`
         CREATE TABLE IF NOT EXISTS prescriptionReminder (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             prescriptionId INTEGER NOT NULL,
@@ -84,9 +84,9 @@ export function initialiseDatabase() {
             enabled INTEGER NOT NULL,
             FOREIGN KEY(prescriptionId) REFERENCES prescription(id)
         );
-    `);
+    `)
 
-    db.execute(`
+  db.execute(`
         CREATE TABLE IF NOT EXISTS sideEffectRecord (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             userMedicationId INTEGER NOT NULL,
@@ -94,9 +94,9 @@ export function initialiseDatabase() {
             description TEXT,
             FOREIGN KEY (userMedicationId) REFERENCES userMedication(id)
         );
-    `);
+    `)
 
-    db.execute(`
+  db.execute(`
         CREATE TABLE IF NOT EXISTS doseRecord (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             scheduleId INTEGER NOT NULL,
@@ -105,9 +105,9 @@ export function initialiseDatabase() {
             status TEXT NOT NULL,
             FOREIGN KEY (scheduleId) REFERENCES medicationSchedule(id)
         );
-    `);
+    `)
 
-    db.execute(`
+  db.execute(`
         CREATE TABLE IF NOT EXISTS interactionRecord (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             userMedicationId INTEGER NOT NULL,
@@ -118,9 +118,9 @@ export function initialiseDatabase() {
             FOREIGN KEY (userMedicationId) REFERENCES userMedication(id),
             FOREIGN KEY (interactingMedicationId) REFERENCES userMedication(id)
         );
-    `);
+    `)
 
-    const result = db.execute("SELECT * FROM medications");
+  const result = db.execute("SELECT * FROM medications")
 
-    console.log(result.rows?.item(0));
+  console.log(result.rows?.item(0))
 }

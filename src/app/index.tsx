@@ -1,5 +1,5 @@
-import CombinationScreen from "../presentation/screens/combinationScreen";
+import HomeScreen from "../presentation/screens/homeScreen"
 
 export default function Index() {
-  return <CombinationScreen />;
+  return <HomeScreen />
 }

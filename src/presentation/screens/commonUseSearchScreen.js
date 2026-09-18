@@ -9,13 +9,11 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native"
 import { router } from "expo-router"
 import { SafeAreaView } from "react-native-safe-area-context"
 
-const FinderScreen = () => {
-  const menuItems = ["Use Camera", "Search Manually"]
-
+const CommonUseSearchScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       {/** Back Arrow */}
-      <TouchableOpacity style={styles.backButton} activeOpacity={0.7} onPress={() => router.back}>
+      <TouchableOpacity style={styles.backButton} activeOpacity={0.7} onPress={() => router.back()}>
         <Image
           source={require("../../../assets/icons/back.png")}
           style={styles.backIcon}
@@ -24,16 +22,7 @@ const FinderScreen = () => {
       </TouchableOpacity>
 
       {/** Title */}
-      <Text style={styles.title}>Finder</Text>
-
-      {/** Menu buttons */}
-      <View style={styles.menuContainer}>
-        {menuItems.map((item, index) => (
-          <TouchableOpacity key={index} style={styles.button} onPress={() => {}}>
-            <Text style={styles.buttonText}>{item}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <Text style={styles.title}>Common Use Search</Text>
     </SafeAreaView>
   )
 }
@@ -48,27 +37,10 @@ const styles = StyleSheet.create({
     height: 30,
     width: 30,
   },
-  button: {
-    alignSelf: "center",
-    backgroundColor: "#4DB3D8",
-    borderRadius: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 18,
-    width: "70%",
-  },
-  buttonText: {
-    color: "#000000",
-    fontSize: 24,
-    fontWeight: "500",
-    textAlign: "center",
-  },
   container: {
     backgroundColor: "#FFFFFF",
     flex: 1,
     paddingHorizontal: 20,
-  },
-  menuContainer: {
-    gap: 20,
   },
   title: {
     color: "#135348",
@@ -81,4 +53,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default FinderScreen
+export default CommonUseSearchScreen
