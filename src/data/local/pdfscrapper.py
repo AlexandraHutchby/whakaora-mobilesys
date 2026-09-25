@@ -4,6 +4,12 @@ doc = fitz.open("nzformulary.pdf")
 
 toc = doc.get_toc()
 
+def get_information(text_between, information_needed):
+    for i in range(len(text_between) -2):
+        if text_between[i] == information_needed:
+            return text_between[i+1]
+    return
+
 def extract_text_between_headers(page1, page2, header1, header2):
     text_between = []
     for page in doc.pages(page1, page2):
@@ -11,9 +17,8 @@ def extract_text_between_headers(page1, page2, header1, header2):
         foundHeader2 = False
         text = page.get_text("text")
         lines = text.split("\n")
-
         for line in lines:
-            if header1 in line:
+            if (header1 == line):
                 foundHeader1 = True
                 continue
             elif header2 in line and foundHeader1:
@@ -65,8 +70,8 @@ def extract_medication_name(toc_start, text_between):
 for i in range(120,140):
     medication = toc[i]
     generic_name = toc[i+1]
-    type = toc[i+2]
-    if (medication[0] == 1 and generic_name[0] == 1 and type[0] == 2):
+    med_type = toc[i+2]
+    if (medication[0] == 1 and generic_name[0] == 1 and med_type[0] == 2):
         name = medication[1]
         first_letter = name[0]
         match first_letter:
@@ -93,11 +98,13 @@ for i in range(120,140):
                     print(medication)
                     break
                 else:
-                    result = extract_text_between_headers(medication[2]-1, type[2]+1, medication[1], type[1])
+                    result = extract_text_between_headers(medication[2]-1, med_type[2]+1, medication[1], med_type[1])
                     general_medication = extract_medication_name(i+1, [])
+                    indications = get_information(result, "Cautions")
                     print(medication)
                     print(generic_name)
-                    print(type)
+                    print(med_type)
                     print(result)
                     print(general_medication)
+                    print(indications)
                     print("==========\n")
