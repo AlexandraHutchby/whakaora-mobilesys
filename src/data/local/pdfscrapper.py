@@ -28,11 +28,12 @@ def extract_text_between_headers(page1, page2, header1, header2):
 
 
 
-for i in range(0, 20):
-    value = toc[i]
-    next_value = toc[i+1]
-    if (next_value[0] == 1 and value[0] == 1):
-        name = value[1]
+for i in range(0, 200):
+    medication = toc[i]
+    generic_name = toc[i+1]
+    type = toc[i+2]
+    if (medication[0] == 1 and generic_name[0] == 1 and type[0] == 2):
+        name = medication[1]
         first_letter = name[0]
         match first_letter:
             case '1':
@@ -55,6 +56,9 @@ for i in range(0, 20):
                 continue
             case _:
                 if(name == "Appendix"):
-                    print(value)
+                    print(medication)
                     break
-                print(extract_text_between_headers(value[2], next_value[2], value[1], next_value[1]))
+                print(medication)
+                    # result = extract_text_between_headers(value[2], next_value[2], value[1], next_value[1])
+                    # if (result != []):
+                    #     print(result)
