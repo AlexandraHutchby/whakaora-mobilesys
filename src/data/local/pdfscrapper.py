@@ -18,7 +18,6 @@ def extract_text_between_headers(page1, page2, header1, header2):
                 continue
             elif header2 in line and foundHeader1:
                 foundHeader2 = True
-                print(line)
                 break
             if foundHeader1 and not foundHeader2:
                 text_between.append(line)
@@ -27,7 +26,6 @@ def extract_text_between_headers(page1, page2, header1, header2):
     return text_between
 
 def extract_medication_name(toc_start, text_between):
-
     if(toc[toc_start][0] == 1):
         medication_name = toc[toc_start]
         if(toc[toc_start+1][0] ==2):
@@ -52,7 +50,7 @@ def extract_medication_name(toc_start, text_between):
         i = 1
         j = 1
         while (toc[toc_start - i][0] != 1):
-            if(toc[toc_start - i] == 2):
+            if(toc[toc_start - i][0] == 2):
                 j = i
             i = i + 1
         medication_name = toc[toc_start - i]
