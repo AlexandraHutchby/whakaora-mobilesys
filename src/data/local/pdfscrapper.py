@@ -1,16 +1,17 @@
 import fitz
+import pandas as pd
+import os
 
-doc = fitz.open("nzformulary.pdf")
-
-toc = doc.get_toc()
+def open_formulary():
+    return fitz.open("nzformulary.pdf")
 
 def get_information(text_between, information_needed):
-    for i in range(len(text_between) -2):
+    for i in range(len(text_between) -1):
         if text_between[i] == information_needed:
             return text_between[i+1]
     return
 
-def extract_text_between_headers(page1, page2, header1, header2):
+def extract_text_between_headers(doc, page1, page2, header1, header2):
     text_between = []
     for page in doc.pages(page1, page2):
         foundHeader1 = False
@@ -30,7 +31,7 @@ def extract_text_between_headers(page1, page2, header1, header2):
             break
     return text_between
 
-def extract_medication_name(toc_start, text_between):
+def extract_medication_name(toc, toc_start, text_between):
     if(toc[toc_start][0] == 1):
         medication_name = toc[toc_start]
         if(toc[toc_start+1][0] ==2):
@@ -38,7 +39,7 @@ def extract_medication_name(toc_start, text_between):
             if(toc[toc_start+2][0] == 3):
                 medication_dosage = toc[toc_start+2]
                 text_between.append([medication_name, medication_type, medication_dosage])
-                extract_medication_name(toc_start + 3, text_between)
+                extract_medication_name(toc, toc_start + 3, text_between)
 
     if(toc[toc_start][0] == 2):
         i = 1
@@ -49,7 +50,7 @@ def extract_medication_name(toc_start, text_between):
         if(toc[toc_start+1][0] == 3):
             medication_dosage = toc[toc_start+1]
             text_between.append([medication_name, medication_type, medication_dosage])
-            extract_medication_name(toc_start + 2, text_between)
+            extract_medication_name(toc, toc_start + 2, text_between)
 
     if(toc[toc_start][0] == 3):
         i = 1
@@ -62,49 +63,50 @@ def extract_medication_name(toc_start, text_between):
         medication_type = toc[toc_start - j]
         medication_dosage = toc[toc_start]
         text_between.append([medication_name, medication_type, medication_dosage])
-        extract_medication_name(toc_start + 1, text_between)
+        extract_medication_name(toc, toc_start + 1, text_between)
 
     return text_between
 
+def json_information(result, general_medication, medication):
+    common_names = [med for med in general_medication]
 
-for i in range(120,140):
-    medication = toc[i]
-    generic_name = toc[i+1]
-    med_type = toc[i+2]
-    if (medication[0] == 1 and generic_name[0] == 1 and med_type[0] == 2):
-        name = medication[1]
-        first_letter = name[0]
-        match first_letter:
-            case '1':
+    information = {"medication_name": medication[1],
+            "common_names": common_names,
+            "common_use": get_information(result, "Indications"),
+            "contra_indication": get_information(result, "Contra-indications"),
+            "cautions": get_information(result, "Cautions"),
+            "side_effects": get_information(result, "Adverse Effects"),
+            "patient_advice": get_information(result, "Patient Advice")
+            }
+
+    return information
+
+def save_to_csv(information, output="data.csv"):
+    if not os.path.exists(output):
+        pd.DataFrame([information]).to_csv(output, index=False)
+        return
+        
+    exisiting_information = pd.read_csv(output)
+    json_df = pd.DataFrame([information])
+    combined_df = pd.concat([exisiting_information, json_df], ignore_index=True)
+    combined_df.to_csv(output, index=False)
+
+if __name__ == "__main__":
+    doc = open_formulary()
+    toc = doc.get_toc()
+    for i in range(len(toc) -2):
+        medication = toc[i]
+        generic_name = toc[i+1]
+        med_type = toc[i+2]
+        if (medication[0] == 1 and generic_name[0] == 1 and med_type[0] == 2):
+            name = medication[1]
+            if name == "Appendix":
+                print(medication)
+                break
+
+            if name[0].isdigit():
                 continue
-            case '2':
-                continue
-            case '3':
-                continue
-            case '4':
-                continue
-            case '5':
-                continue
-            case '6':
-                continue
-            case '7':
-                continue
-            case '8': 
-                continue
-            case '9':
-                continue
-            case _:
-                if(name == "Appendix"):
-                    print(medication)
-                    break
-                else:
-                    result = extract_text_between_headers(medication[2]-1, med_type[2]+1, medication[1], med_type[1])
-                    general_medication = extract_medication_name(i+1, [])
-                    indications = get_information(result, "Cautions")
-                    print(medication)
-                    print(generic_name)
-                    print(med_type)
-                    print(result)
-                    print(general_medication)
-                    print(indications)
-                    print("==========\n")
+
+            result = extract_text_between_headers(doc, medication[2]-1, med_type[2]+1, medication[1], med_type[1])
+            general_medication = extract_medication_name(toc, i+1, [])
+            save_to_csv(json_information(result, general_medication, medication))
