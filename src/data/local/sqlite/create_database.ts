@@ -119,8 +119,4 @@ export function initialiseDatabase() {
             FOREIGN KEY (interactingMedicationId) REFERENCES userMedication(id)
         );
     `)
-
-  const result = db.execute("SELECT * FROM medications")
-
-  console.log(result.rows?.item(0))
 }

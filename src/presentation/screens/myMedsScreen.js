@@ -50,7 +50,15 @@ const MyMedsScreen = () => {
         ))}
 
         {/** Add a new medication */}
-        <TouchableOpacity style={styles.addRow} onPress={() => router.push("/finder")}>
+        <TouchableOpacity
+          style={styles.addRow}
+          onPress={() =>
+            router.push({
+              pathname: "/screen",
+              params: { destination: "manualSearch" },
+            })
+          }
+        >
           <Text style={styles.addIcon}>+</Text>
         </TouchableOpacity>
       </View>

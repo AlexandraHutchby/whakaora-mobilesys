@@ -4,12 +4,27 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-restricted-imports */
 
-import React from "react"
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native"
-import { router } from "expo-router"
+import React, { useEffect, useState } from "react"
+import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList } from "react-native"
+import { router, useLocalSearchParams } from "expo-router"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { getMedicationReferenceByType } from "@/application/services/medicationReferenceService"
+
 const CommonUseSearchScreen = () => {
+  const params = useLocalSearchParams()
+  const commonUse = typeof params.commonUse === "string" ? params.commonUse : ""
+
+  const [items, setItems] = useState([])
+
+  useEffect(() => {
+    if (!commonUse) {
+      setItems([])
+      return
+    }
+    setItems(getMedicationReferenceByType(commonUse))
+  }, [commonUse])
+
   return (
     <SafeAreaView style={styles.container}>
       {/** Back Arrow */}
@@ -23,6 +38,20 @@ const CommonUseSearchScreen = () => {
 
       {/** Title */}
       <Text style={styles.title}>Common Use Search</Text>
+
+      <Text style={styles.filterText}>Showing results for: {commonUse || "No use selected"}</Text>
+
+      <FlatList
+        data={items}
+        keyExtractor={(item) => String(item.id)}
+        renderItem={({ item }) => (
+          <View style={styles.row}>
+            <Text style={styles.medName}>{item.medicationName}</Text>
+            <Text style={styles.medSub}>{item.commonName || "No common name"}</Text>
+          </View>
+        )}
+        contentContainerStyle={styles.listContent}
+      />
     </SafeAreaView>
   )
 }
@@ -42,13 +71,35 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
+  filterText: {
+    color: "#374151",
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  listContent: {
+    paddingBottom: 30,
+  },
+  medName: {
+    color: "#111827",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  medSub: {
+    color: "#4B5563",
+    fontSize: 13,
+    marginTop: 4,
+  },
+  row: {
+    borderBottomColor: "#E5E7EB",
+    borderBottomWidth: 1,
+    paddingVertical: 12,
+  },
   title: {
     color: "#135348",
     fontSize: 50,
     fontWeight: "600",
     marginBottom: 32,
     marginTop: 8,
-
     textAlign: "center",
   },
 })
