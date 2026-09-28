@@ -35,6 +35,39 @@ export function addMedicationReference(data: NewMedicationReference): number {
   return result.insertId as number
 }
 
+export function importMedicationReferences(
+  records: Array<{
+    medication_name: string
+    common_names?: unknown
+    common_use?: string | null
+    contra_indication?: string | null
+    cautions?: string | null
+    side_effects?: string | null
+    patient_advice?: string | null
+  }>,
+): void {
+  for (const record of records) {
+    const commonNames = Array.isArray(record.common_names)
+      ? record.common_names
+          .flat(Infinity)
+          .filter((item): item is string => typeof item === "string")
+          .join(", ")
+      : typeof record.common_names === "string"
+        ? record.common_names
+        : null
+
+    addMedicationReference({
+      medicationName: record.medication_name,
+      commonName: commonNames,
+      commonUse: record.common_use ?? null,
+      contraIndication: record.contra_indication ?? null,
+      cautions: record.cautions ?? null,
+      sideEffects: record.side_effects ?? null,
+      patientAdvice: record.patient_advice ?? null,
+    })
+  }
+}
+
 // ========== READ ==========
 export function getAllMedicationReferences(): MedicationReference[] {
   const result = db.execute("SELECT * FROM medicationReference ORDER BY medicationName ASC")
