@@ -1,137 +1,255 @@
 import fitz
-import pandas as pd
-import os
 import json
+import re
+
+PDF_FILE = "nzformulary.pdf"
+OUTPUT_FILE = "medications.json" 
+
+SECTION_HEADERS = [
+    "Indications",
+    "Contra-indications",
+    "Cautions",
+    "Adverse Effects",
+    "Patient Advice",
+]
+
+BRAND_LABELS = [
+    "Trade names",
+    "Trade name",
+    "Brand names",
+    "Brand name",
+    "Brands",
+    "Proprietary preparations",
+    "Preparations",
+]
+
+def clean_text(value):
+    if not value:
+        return ""
+
+    return (
+        str(value).replace("\u2013", "-").replace("\u2014", "-").replace("\xa0", " ").strip()
+    )
 
 def open_formulary():
-    return fitz.open("nzformulary.pdf")
+    return fitz.open(PDF_FILE)
 
-def get_information(text_between, information_needed):
-    for i in range(len(text_between) -1):
-        if text_between[i] == information_needed:
-            return text_between[i+1]
-    return
+def extract_pages(doc, start_page, end_page):
+    pages = []
 
-def extract_text_between_headers(doc, page1, page2, header1, header2):
-    text_between = []
-    for page in doc.pages(page1, page2):
-        foundHeader1 = False
-        foundHeader2 = False
-        text = page.get_text("text")
-        lines = text.split("\n")
-        for line in lines:
-            if (header1 == line):
-                foundHeader1 = True
-                continue
-            elif header2 in line and foundHeader1:
-                foundHeader2 = True
-                break
-            if foundHeader1 and not foundHeader2:
-                text_between.append(line)
-        if foundHeader2:
+    for page_number in range(start_page, min(end_page + 1, len(doc))):
+        text = doc[page_number].get_text("text")
+        pages.append(text)
+
+    return "\n".join(pages)
+
+def extract_section(text, heading, headings=SECTION_HEADERS):
+    lines = [clean_text(line) for line in text.splitlines()]
+
+    start = None
+    for i, line in enumerate(lines):
+        if line.casefold() == heading.casefold():
+            start = i + 1
             break
-    return text_between
 
-def extract_medication_name(toc, toc_start, text_between):
-    if(toc[toc_start][0] == 1):
-        medication_name = toc[toc_start]
-        if(toc[toc_start+1][0] ==2):
-            medication_type = toc[toc_start+1]
-            if(toc[toc_start+2][0] == 3):
-                medication_dosage = toc[toc_start+2]
-                text_between.append([medication_name, medication_type, medication_dosage])
-                extract_medication_name(toc, toc_start + 3, text_between)
+    if start is None:
+        return ""
 
-    if(toc[toc_start][0] == 2):
-        i = 1
-        while (toc[toc_start - i][0] != 1):
-            i = i + 1
-        medication_name = toc[toc_start-i]
-        medication_type = toc[toc_start]
-        if(toc[toc_start+1][0] == 3):
-            medication_dosage = toc[toc_start+1]
-            text_between.append([medication_name, medication_type, medication_dosage])
-            extract_medication_name(toc, toc_start + 2, text_between)
+    result = []
 
-    if(toc[toc_start][0] == 3):
-        i = 1
-        j = 1
-        while (toc[toc_start - i][0] != 1):
-            if(toc[toc_start - i][0] == 2):
-                j = i
-            i = i + 1
-        medication_name = toc[toc_start - i]
-        medication_type = toc[toc_start - j]
-        medication_dosage = toc[toc_start]
-        text_between.append([medication_name, medication_type, medication_dosage])
-        extract_medication_name(toc, toc_start + 1, text_between)
+    for line in lines[start:]:
+        if any(
+            line.casefold() == other.casefold()
+            for other in headings
+            if other.casefold() != heading.casefold()
+        ):
+            break
 
-    return text_between
+        if line:
+            result.append(line)
 
-def json_information(result, general_medication, medication):
-    common_names = []
+    return " ".join(result)
 
-    for item in general_medication:
-        if isinstance(item, list) and len(item) > 0 and isinstance(item[0], list):
-            if len(item[0]) > 1 and isinstance(item[0][1], str):
-                common_names.append(item[0][1])
+def extract_brand_names(text, generic_name):
+    lines = [clean_text(line) for line in text.splitlines()]
+    brands = []
 
-    information = {
-        "medication_name": medication[1],
-        "common_names": common_names,
-        "common_use": get_information(result, "Indications"),
-        "contra_indication": get_information(result, "Contra-indications"),
-        "cautions": get_information(result, "Cautions"),
-        "side_effects": get_information(result, "Adverse Effects"),
-        "patient_advice": get_information(result, "Patient Advice"),
+    for i, line in enumerate(lines):
+        lower = line.casefold()
+
+        for label in BRAND_LABELS:
+            label_lower = label.casefold()
+
+            if lower.startswith(label_lower + ":"):
+                brands.extend(split_names(line.split(":", 1)[1]))
+            elif lower == label_lower and i + 1 < len(lines):
+                brands.extend(split_names(lines[i + 1]))
+
+    brands.extend(extract_registered_brands(text))
+
+    return clean_brand_names(brands, generic_name)
+
+def split_names(value):
+    if not value:
+        return []
+    return [
+        clean_text(name)
+        for name in re.split(r"[,;]", value)
+        if clean_text(name)
+    ]
+
+def extract_registered_brands(text):
+    if not text:
+        return []
+
+    pattern = r"\b[A-Za-z][A-Za-z0-9-]*(?:[®™](?:\s+[A-Za-z][A-Za-z0-9-]*[®™])*)"
+    matches = re.findall(pattern, text)
+
+    brands = []
+    seen = set()
+
+    for match in matches:
+        brand = match.replace("®", "").replace("™", "").strip()
+        key = brand.casefold()
+
+        if brand and key not in seen:
+            seen.add(key)
+            brands.append(brand)
+
+    return brands
+
+def clean_brand_names(names, generic_name):
+    cleaned = []
+    seen = set()
+    generic_key = clean_text(generic_name).casefold()
+
+    excluded = {
+        "tablet",
+        "tablets",
+        "capsule",
+        "capsules",
+        "injection",
+        "solution",
+        "oral liquid",
+        "syrup",
+        "drops",
+        "powder",
+        "inhalation",
     }
 
-    return information
+    for name in names:
+        name = clean_text(name)
+        key = name.casefold()
 
-def save_to_csv(information, output="data.csv"):
-    if not os.path.exists(output):
-        pd.DataFrame([information]).to_csv(output, index=False)
-        return
-        
-    exisiting_information = pd.read_csv(output)
-    json_df = pd.DataFrame([information])
-    combined_df = pd.concat([exisiting_information, json_df], ignore_index=True)
-    combined_df.to_csv(output, index=False)
+        if not name or key == generic_key or key in seen:
+            continue
 
-def save_to_json(records, output="medications.json"):
-    with open(output, "w", encoding="utf-8") as file:
-        json.dump(records, file, ensure_ascii=False, indent=2)
+        if key in excluded:
+            continue
 
-if __name__ == "__main__":
-    doc = open_formulary()
-    toc = doc.get_toc()
-    all_records = []
+        seen.add(key)
+        cleaned.append(name)
 
-    for i in range(len(toc) - 2):
-        medication = toc[i]
-        generic_name = toc[i + 1]
-        med_type = toc[i + 2]
+    return cleaned
 
-        if medication[0] == 1 and generic_name[0] == 1 and med_type[0] == 2:
-            name = medication[1]
+def find_medications(toc):
+    medications = []
 
-            if name == "Appendix":
-                print(medication)
+    for i, entry in enumerate(toc):
+        level, title, page = entry
+
+        if level != 1:
+            continue
+
+        title = clean_text(title)
+
+        if not title:
+            continue
+
+        if title == "Appendix":
+            break
+
+        if title[0].isdigit():
+            continue
+
+        end_page = page
+
+        for next_entry in toc[i + 1:]:
+            if next_entry[0] == 1:
+                end_page = next_entry[2]
                 break
 
-            if len(name) > 0 and name[0].isdigit():
-                continue
+        medications.append(
+            {
+                "name": title,
+                "start_page": page - 1,
+                "end_page": end_page - 1,
+            }
+        )
 
-            result = extract_text_between_headers(
-                doc,
-                medication[2] - 1,
-                med_type[2] + 1,
-                medication[1],
-                med_type[1],
-            )
+    return medications
 
-            general_medication = extract_medication_name(toc, i + 1, [])
-            record = json_information(result, general_medication, medication)
-            all_records.append(record)
+def build_record(doc, medication):
+    name = medication["name"]
 
-    save_to_json(all_records)
+    text = extract_pages(
+        doc,
+        medication["start_page"],
+        medication["end_page"],
+    )
+
+    brands = extract_brand_names(text, name)
+
+    return {
+        "medication_name": name,
+        "common_names": brands,
+        "common_use": extract_section(
+            text,
+            "Indications",
+        ),
+
+        "contra_indication": extract_section(
+            text,
+            "Contra-indications",
+        ),
+
+        "cautions": extract_section(
+            text,
+            "Cautions",
+        ),
+
+        "side_effects": extract_section(
+            text,
+            "Adverse Effects",
+        ),
+
+        "patient_advice": extract_section(
+            text,
+            "Patient Advice",
+        ),
+    }
+
+def save_to_json(records, output=OUTPUT_FILE):
+    with open(output, "w", encoding="utf-8") as file:
+        json.dump(
+            records,
+            file,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+def main():
+    doc = open_formulary()
+    toc = doc.get_toc()
+
+    medications = find_medications(toc[110:])
+    records = []
+
+    for medication in medications:
+        record = build_record(doc, medication)
+        records.append(record)
+
+    save_to_json(records)
+
+if __name__ == "__main__":
+    main()
