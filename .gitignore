@@ -96,3 +96,4 @@ src/data/local/data.csv
 
 src/data/local/__pycache__
 test/__pycache__
+src/data/local/medications.json

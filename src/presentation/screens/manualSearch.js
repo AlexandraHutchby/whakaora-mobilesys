@@ -75,7 +75,6 @@ const ManualSearchScreen = () => {
           <Text style={styles.detailTitle}>{selected.medicationName}</Text>
           <Text style={styles.detailText}>Common Name: {selected.commonName || "Not listed"}</Text>
           <Text style={styles.detailText}>Common Use: {selected.commonUse || "Not listed"}</Text>
-          <Text style={styles.detailText}>Cautions: {selected.cautions || "Not listed"}</Text>
           <TouchableOpacity onPress={clearSelection} style={styles.clearButton}>
             <Text style={styles.clearButtonText}>Clear</Text>
           </TouchableOpacity>

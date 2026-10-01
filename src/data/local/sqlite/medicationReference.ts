@@ -96,6 +96,11 @@ export function searchMedicationReferencesByUse(commonUse: string): MedicationRe
   return (result.rows?._array as MedicationReference[]) ?? []
 }
 
+export function countMedicationReferences(): number {
+  const result = db.execute("SELECT COUNT(*) AS count FROM medicationReference")
+  return Number(result.rows?._array?.[0]?.count ?? 0)
+}
+
 // ========== UPDATE ==========
 
 export function updateMedicationReference(id: number, data: MedicationReferenceUpdate): void {
