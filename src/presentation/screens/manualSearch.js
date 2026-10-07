@@ -11,21 +11,40 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { useMedicationReferenceList } from "../hooks/useMedicationReferenceList"
 
 const ManualSearchScreen = () => {
-  const { medications, query, setQuery, selected, select, clearSelection } =
-    useMedicationReferenceList()
+  const { medications, query, setQuery } = useMedicationReferenceList()
 
-  const useBoxes = useMemo(() => {
-    const values = new Set()
-    for (const med of medications) {
-      if (med.commonUse) values.add(med.commonUse)
-    }
-    return [...values].slice(0, 8)
-  }, [medications])
+  const useBoxes = [
+    { label: "Asthma", keywords: ["asthma"] },
+    { label: "Diabetes", keywords: ["diabetes", "diabetic", "insulin"] },
+    { label: "Pain", keywords: ["pain", "analgesia", "headache", "migraine"] },
+    { label: "Hypertension", keywords: ["hypertension", "blood pressure"] },
+    { label: "Heart", keywords: ["heart failure", "angina", "cardiac", "arrhythmia"] },
+    { label: "Infection", keywords: ["infection", "bacterial", "viral", "fungal"] },
+    { label: "Allergy", keywords: ["allergy", "allergic", "anaphylaxis"] },
+  ].filter((category) =>
+    medications.some((medication) => {
+      const use = medication.commonUse.toLowerCase()
+      return category.keywords.some((keyword) => use.includes(keyword))
+    }),
+  )
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.row} onPress={() => select(item.id)} activeOpacity={0.7}>
+    <TouchableOpacity
+      style={styles.row}
+      activeOpacity={0.7}
+      onPress={() =>
+        router.push({
+          pathname: "/screen",
+          params: {
+            destination: "medicationDetails",
+            medicationId: String(item.id),
+          },
+        })
+      }
+    >
       <Text style={styles.medName}>{item.medicationName}</Text>
-      <Text style={styles.medSub}>{item.commonUse || "No use listed"}</Text>
+
+      {item.commonName ? <Text style={styles.medSub}>{item.commonName}</Text> : null}
     </TouchableOpacity>
   )
 
@@ -51,35 +70,24 @@ const ManualSearchScreen = () => {
         placeholderTextColor="#6b7280"
       />
 
-      <Text style={styles.sectionTitle}>Browse by use</Text>
+      {/* <Text style={styles.sectionTitle}>Browse by use</Text> */}
 
-      <View style={styles.useBoxGrid}>
-        {useBoxes.map((useValue) => (
+      {/* <View style={styles.useBoxGrid}>
+        {useBoxes.map((category) => (
           <TouchableOpacity
-            key={useValue}
+            key={category.label}
             style={styles.useBox}
             onPress={() =>
               router.push({
                 pathname: "/screen",
-                params: { destination: "commonUseSearch", commonUse: useValue },
+                params: { destination: "commonUseSearch", commonUse: category.label },
               })
             }
           >
-            <Text style={styles.useBoxText}>{useValue}</Text>
+            <Text style={styles.useBoxText}>{category.label}</Text>
           </TouchableOpacity>
         ))}
-      </View>
-
-      {selected && (
-        <View style={styles.detailCard}>
-          <Text style={styles.detailTitle}>{selected.medicationName}</Text>
-          <Text style={styles.detailText}>Common Name: {selected.commonName || "Not listed"}</Text>
-          <Text style={styles.detailText}>Common Use: {selected.commonUse || "Not listed"}</Text>
-          <TouchableOpacity onPress={clearSelection} style={styles.clearButton}>
-            <Text style={styles.clearButtonText}>Clear</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      </View> */}
 
       <FlatList
         data={medications}
@@ -102,36 +110,10 @@ const styles = StyleSheet.create({
     height: 30,
     width: 30,
   },
-  clearButton: {
-    alignSelf: "flex-start",
-    marginTop: 8,
-  },
-  clearButtonText: {
-    color: "#135348",
-    fontWeight: "600",
-  },
   container: {
     backgroundColor: "#FFFFFF",
     flex: 1,
     paddingHorizontal: 20,
-  },
-  detailCard: {
-    backgroundColor: "#D5F9FA",
-    borderRadius: 12,
-    marginBottom: 12,
-    padding: 12,
-  },
-  detailText: {
-    color: "#135348",
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 6,
-  },
-  detailTitle: {
-    color: "#135348",
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 6,
   },
   listContent: {
     paddingBottom: 40,
@@ -161,12 +143,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
-  sectionTitle: {
-    color: "#135348",
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
+  // sectionTitle: {
+  //   color: "#135348",
+  //   fontSize: 18,
+  //   fontWeight: "600",
+  //   marginBottom: 8,
+  // },
   title: {
     color: "#135348",
     fontSize: 50,
@@ -175,25 +157,25 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: "center",
   },
-  useBox: {
-    backgroundColor: "#EAF7F5",
-    borderRadius: 10,
-    marginBottom: 8,
-    marginRight: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  useBoxGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 16,
-  },
-  useBoxText: {
-    color: "#135348",
-    fontSize: 12,
-    fontWeight: "600",
-  },
+  // useBox: {
+  //   backgroundColor: "#EAF7F5",
+  //   borderRadius: 10,
+  //   marginBottom: 8,
+  //   marginRight: 8,
+  //   paddingHorizontal: 10,
+  //   paddingVertical: 8,
+  // },
+  // useBoxGrid: {
+  //   flexDirection: "row",
+  //   flexWrap: "wrap",
+  //   gap: 8,
+  //   marginBottom: 16,
+  // },
+  // useBoxText: {
+  //   color: "#135348",
+  //   fontSize: 12,
+  //   fontWeight: "600",
+  // },
 })
 
 export default ManualSearchScreen

@@ -4,6 +4,7 @@ export type UserMedication = {
   id: number
   medicationReferenceId: number | null
   medicationName: string
+  customName: string | null
 }
 
 export type NewUserMedication = Omit<UserMedication, "id">
@@ -14,9 +15,9 @@ export type UserMedicationUpdate = Partial<NewUserMedication>
 
 export function addUserMedication(data: NewUserMedication): number {
   const result = db.execute(
-    `INSERT INTO userMedication (medicationReferenceId, medicationName) 
-        VALUES (?,?)`,
-    [data.medicationReferenceId, data.medicationName],
+    `INSERT INTO userMedication (medicationReferenceId, medicationName, customName) 
+        VALUES (?,?,?)`,
+    [data.medicationReferenceId, data.medicationName, data.customName],
   )
   return result.insertId as number
 }
@@ -54,6 +55,15 @@ export function getUserMedicationWithReference(id: number) {
   )
   const rows = result.rows?._array
   return rows && rows.length > 0 ? rows[0] : null
+}
+
+export function userMedicationExists(medicationReferenceId: number): boolean {
+  const result = db.execute(
+    "SELECT id FROM userMedication WHERE medicationReferenceId = ? LIMIT 1",
+    [medicationReferenceId],
+  )
+
+  return Boolean(result.rows?._array?.length)
 }
 
 // ========== UPDATE ==========

@@ -81,9 +81,10 @@ export function getMedicationReferenceById(id: number): MedicationReference | nu
 }
 
 export function searchMedicationReferencesByName(query: string): MedicationReference[] {
+  const pattern = `%${query}%`
   const result = db.execute(
-    "SELECT * FROM medicationReference WHERE commonName LIKE ? ORDER BY commonName ASC",
-    [`%${query}%`],
+    "SELECT * FROM medicationReference WHERE medicationName LIKE ? or commonName LIKE ? ORDER BY commonName ASC",
+    [pattern, pattern],
   )
   return (result.rows?._array as MedicationReference[]) ?? []
 }

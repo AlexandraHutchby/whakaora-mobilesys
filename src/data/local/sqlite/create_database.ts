@@ -19,6 +19,7 @@ export function initialiseDatabase() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             medicationReferenceId INTEGER,
             medicationName TEXT NOT NULL,
+            customName TEXT,
             FOREIGN KEY (medicationReferenceId) REFERENCES medicationReference(id)
         );
     `)
