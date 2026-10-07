@@ -40,17 +40,42 @@ const MyMedsScreen = () => {
             </TouchableOpacity>
 
             <View style={styles.medInfo}>
-              <Text style={styles.medName}>{med.medicationName}</Text>
+              <Text style={styles.medName}>{med.displayName}</Text>
+              {med.customName ? <Text style={styles.medDosage}>{med.medicationName}</Text> : null}
               <Text style={styles.medDosage}>{med.dosage ?? "No dosage set"}</Text>
             </View>
-            <TouchableOpacity style={styles.editutton} onPress={() => router.push(`/med`)}>
+            <TouchableOpacity
+              style={styles.editutton}
+              onPress={() =>
+                router.push({
+                  pathname: "/screen",
+                  params: {
+                    destination: "med",
+                    userMedicationId: String(med.id),
+                    medicationReferenceId: med.medicationReferenceId
+                      ? String(med.medicationReferenceId)
+                      : "",
+                    medicationName: med.medicationName,
+                    customName: med.customName || "",
+                  },
+                })
+              }
+            >
               <Text style={styles.editIcon}>✎</Text>
             </TouchableOpacity>
           </View>
         ))}
 
         {/** Add a new medication */}
-        <TouchableOpacity style={styles.addRow} onPress={() => router.push("/finder")}>
+        <TouchableOpacity
+          style={styles.addRow}
+          onPress={() =>
+            router.push({
+              pathname: "/screen",
+              params: { destination: "manualSearch" },
+            })
+          }
+        >
           <Text style={styles.addIcon}>+</Text>
         </TouchableOpacity>
       </View>

@@ -19,6 +19,7 @@ export function initialiseDatabase() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             medicationReferenceId INTEGER,
             medicationName TEXT NOT NULL,
+            customName TEXT,
             FOREIGN KEY (medicationReferenceId) REFERENCES medicationReference(id)
         );
     `)
@@ -119,8 +120,4 @@ export function initialiseDatabase() {
             FOREIGN KEY (interactingMedicationId) REFERENCES userMedication(id)
         );
     `)
-
-  const result = db.execute("SELECT * FROM medications")
-
-  console.log(result.rows?.item(0))
 }

@@ -19,12 +19,12 @@ export type NewMedicationSchedule = Omit<MedicationSchedule, "id">
 export type MedicationScheduleUpdate = Partial<NewMedicationSchedule>
 
 // ========== CREATE ==========
-export function addMedicationSchedule(data: MedicationSchedule): number {
+export function addMedicationSchedule(data: NewMedicationSchedule): number {
   const result = db.execute(
     `INSERT INTO medicationSchedule
-        (userMedicationId, freqency, freqencyType, scheduleTimes, startDate, endDate,
-        doseAmount, doseUnit, instructions, enabled) VALUES
-        (?, ?, ?,?,?,?,?,?,?,?)`,
+      (userMedicationId, frequency, frequencyType, scheduleTimes,
+       startDate, endDate, doseAmount, doseUnit, instructions, enabled)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.userMedicationId,
       data.frequency,

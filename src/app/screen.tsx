@@ -10,6 +10,7 @@ import FoodTimingsScreen from "@/presentation/screens/foodTimingsScreen"
 import HomeScreen from "@/presentation/screens/homeScreen"
 import LoginScreen from "@/presentation/screens/loginScreen"
 import ManualSearchScreen from "@/presentation/screens/manualSearch"
+import MedicationDetailsScreen from "@/presentation/screens/medicationDetailsScreen"
 import MedScreen from "@/presentation/screens/medScreen"
 import MyMedScreen from "@/presentation/screens/myMedsScreen"
 import ScheduleScreen from "@/presentation/screens/scheduleScreen"
@@ -28,6 +29,7 @@ const screenRegistry: Record<string, React.ComponentType> = {
   login: LoginScreen,
   manualSearch: ManualSearchScreen,
   med: MedScreen,
+  medicationDetails: MedicationDetailsScreen,
 }
 
 export default function Screens() {

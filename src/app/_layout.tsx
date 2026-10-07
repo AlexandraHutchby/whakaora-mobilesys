@@ -4,7 +4,12 @@ import { useFonts } from "@expo-google-fonts/space-grotesk"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
 
+import rawMedicationData from "@/data/local/medications.json"
 import { initialiseDatabase } from "@/data/local/sqlite/create_database"
+import {
+  countMedicationReferences,
+  importMedicationReferences,
+} from "@/data/local/sqlite/medicationReference"
 import { initI18n } from "@/i18n"
 import { ThemeProvider } from "@/theme/context"
 import { customFontsToLoad } from "@/theme/typography"
@@ -20,19 +25,35 @@ if (__DEV__) {
 }
 
 export default function Root() {
+  type MedicationImportRecord = {
+    medication_name: string
+    common_names?: unknown
+    common_use?: string | null
+    contra_indication?: string | null
+    cautions?: string | null
+    side_effects?: string | null
+    patient_advice?: string | null
+  }
+
   const [fontsLoaded, fontError] = useFonts(customFontsToLoad)
   const [isI18nInitialized, setIsI18nInitialized] = useState(false)
+  const medicationData = rawMedicationData as unknown as MedicationImportRecord[]
 
   useEffect(() => {
     try {
       initialiseDatabase()
+      if (countMedicationReferences() === 0) {
+        for (const item of medicationData) {
+          importMedicationReferences([item])
+        }
+      }
     } catch (error) {
       console.log("Error initialising database:", error)
     }
     initI18n()
       .then(() => setIsI18nInitialized(true))
       .then(() => loadDateFnsLocale())
-  }, [])
+  }, [medicationData])
 
   const loaded = fontsLoaded && isI18nInitialized
 

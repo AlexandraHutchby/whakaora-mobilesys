@@ -90,3 +90,10 @@ web-build/
 # Dependency Graph Visualizations
 app-dependency-graph.svg
 app-dependency-graph.png
+
+src/data/local/nzformulary.pdf
+src/data/local/data.csv
+
+src/data/local/__pycache__
+test/__pycache__
+src/data/local/medications.json
