@@ -28,7 +28,7 @@ export function initialiseDatabase() {
         CREATE TABLE IF NOT EXISTS mealSchedule (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             mealType TEXT NOT NULL,
-            scheduledTime TEXT,
+            scheduleTime TEXT,
             enabled INTEGER NOT NULL
         );
     `)

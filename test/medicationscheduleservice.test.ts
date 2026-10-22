@@ -63,7 +63,7 @@ const scheduleRow = (overrides: Record<string, unknown> = {}) => ({
   userMedicationId: 10,
   frequency: 1,
   frequencyType: "Day",
-  scheduledTimes: "",
+  scheduleTime: "",
   startDate: "2026-01-01",
   endDate: null,
   doseAmount: 500,
@@ -121,7 +121,7 @@ afterEach(() => {
 describe("list medication schedules", () => {
   it("maps rows to schedule entries", () => {
     getSchedules.mockReturnValue([
-      scheduleRow({ id: 1, scheduledTimes: "08:00,12:00" }),
+      scheduleRow({ id: 1, scheduleTime: "08:00,12:00" }),
       scheduleRow({ id: 2 }),
     ])
 
@@ -205,10 +205,10 @@ describe("preview schedule", () => {
 
   it("only passes meals that are enabled and have a valid time", () => {
     getMeals.mockReturnValue([
-      { id: 1, mealType: "Breakfast", scheduledTime: "08:00", enabled: 1 },
-      { id: 2, mealType: "Lunch", scheduledTime: "13:00", enabled: 0 },
-      { id: 3, mealType: "Snack", scheduledTime: null, enabled: 1 },
-      { id: 4, mealType: "Dinner", scheduledTime: "19:00", enabled: 1 },
+      { id: 1, mealType: "Breakfast", scheduleTime: "08:00", enabled: 1 },
+      { id: 2, mealType: "Lunch", scheduleTime: "13:00", enabled: 0 },
+      { id: 3, mealType: "Snack", scheduleTime: null, enabled: 1 },
+      { id: 4, mealType: "Dinner", scheduleTime: "19:00", enabled: 1 },
     ])
 
     previewSchedule()
@@ -250,7 +250,7 @@ describe("regenerate schedule", () => {
   })
 
   it("write the new dose times back to a schedule whose times changed", () => {
-    getSchedules.mockReturnValue([scheduleRow({ id: 1, userMedicationId: 10, scheduledTimes: "" })])
+    getSchedules.mockReturnValue([scheduleRow({ id: 1, userMedicationId: 10, scheduleTime: "" })])
     generate.mockReturnValue({ doses: [dose(10, "09:30")], warnings: [] })
 
     regenerateSchedule()
@@ -261,7 +261,7 @@ describe("regenerate schedule", () => {
 
   it("joins several doses for the same medication in order", () => {
     getSchedules.mockReturnValue([
-      scheduleRow({ id: 2, userMedicationId: 20, scheduledTimes: "08:00,12:00" }),
+      scheduleRow({ id: 2, userMedicationId: 20, scheduleTime: "08:00,12:00" }),
     ])
     generate.mockReturnValue({
       doses: [dose(20, "08:00"), dose(20, "12:00"), dose(20, "18:00")],
@@ -274,7 +274,7 @@ describe("regenerate schedule", () => {
 
   it("does not write when the times are unchanged", () => {
     getSchedules.mockReturnValue([
-      scheduleRow({ id: 2, userMedicationId: 20, scheduledTimes: "08:00,12:00" }),
+      scheduleRow({ id: 2, userMedicationId: 20, scheduleTime: "08:00,12:00" }),
     ])
     generate.mockReturnValue({ doses: [dose(20, "08:00"), dose(20, "12:00")], warnings: [] })
     regenerateSchedule()
@@ -283,7 +283,7 @@ describe("regenerate schedule", () => {
 
   it("clears the times of a schedule that no longer produces any doses", () => {
     getSchedules.mockReturnValue([
-      scheduleRow({ id: 3, userMedicationId: 30, scheduledTimes: "08:00" }),
+      scheduleRow({ id: 3, userMedicationId: 30, scheduleTime: "08:00" }),
     ])
     generate.mockReturnValue(EMPTY_RESULT)
     regenerateSchedule()
@@ -292,8 +292,8 @@ describe("regenerate schedule", () => {
 
   it("only touches schedules whose times changed", () => {
     getSchedules.mockReturnValue([
-      scheduleRow({ id: 1, userMedicationId: 10, scheduledTimes: "" }),
-      scheduleRow({ id: 2, userMedicationId: 20, scheduledTimes: "12:00" }),
+      scheduleRow({ id: 1, userMedicationId: 10, scheduleTime: "" }),
+      scheduleRow({ id: 2, userMedicationId: 20, scheduleTime: "12:00" }),
     ])
     generate.mockReturnValue({ doses: [dose(10, "09:30"), dose(20, "12:00")], warnings: [] })
     regenerateSchedule()

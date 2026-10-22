@@ -147,12 +147,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
-  // sectionTitle: {
-  //   color: "#135348",
-  //   fontSize: 18,
-  //   fontWeight: "600",
-  //   marginBottom: 8,
-  // },
   title: {
     color: "#135348",
     fontSize: 50,
@@ -161,25 +155,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: "center",
   },
-  // useBox: {
-  //   backgroundColor: "#EAF7F5",
-  //   borderRadius: 10,
-  //   marginBottom: 8,
-  //   marginRight: 8,
-  //   paddingHorizontal: 10,
-  //   paddingVertical: 8,
-  // },
-  // useBoxGrid: {
-  //   flexDirection: "row",
-  //   flexWrap: "wrap",
-  //   gap: 8,
-  //   marginBottom: 16,
-  // },
-  // useBoxText: {
-  //   color: "#135348",
-  //   fontSize: 12,
-  //   fontWeight: "600",
-  // },
 })
 
 export default ManualSearchScreen

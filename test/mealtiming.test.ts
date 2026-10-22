@@ -5,7 +5,7 @@ import { MealTiming } from "../src/application/domain/MealTiming"
 const row = (overrides: Record<string, unknown> = {}) => ({
   id: 1,
   mealType: "Breakfast",
-  scheduledTime: "08:00",
+  scheduleTime: "08:00",
   enabled: 1,
   ...overrides,
 })
@@ -23,8 +23,8 @@ describe("MealTiming.fromRow", () => {
   })
 
   it("uses null when no time is stored", () => {
-    expect(MealTiming.fromRow(row({ scheduledTime: undefined })).scheduleTime).toBeNull()
-    expect(MealTiming.fromRow(row({ scheduledTime: null })).scheduleTime).toBeNull()
+    expect(MealTiming.fromRow(row({ scheduleTime: undefined })).scheduleTime).toBeNull()
+    expect(MealTiming.fromRow(row({ scheduleTime: null })).scheduleTime).toBeNull()
   })
 
   it.each([

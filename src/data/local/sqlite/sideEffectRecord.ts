@@ -24,7 +24,7 @@ export function addSideEffectRecord(data: SideEffectRecord): number {
 
 // ========== READ ==========
 export function getAllSideEffectRecords(): SideEffectRecord[] {
-  const result = db.execute("SELECT * FROM sideEffectRecords ORDER BY userMedicationId ASC")
+  const result = db.execute("SELECT * FROM sideEffectRecord ORDER BY userMedicationId ASC")
   return (result.rows?._array as SideEffectRecord[]) ?? []
 }
 

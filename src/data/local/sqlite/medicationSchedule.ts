@@ -49,7 +49,7 @@ export function getAllMedicationSchedule(): MedicationSchedule[] {
 
 export function getCurrentMedicationSchedule(): MedicationSchedule[] {
   const result = db.execute(
-    "SELECT * FROM medicationSchedule WHERE endDate IS NULL OR WHERE endDate > date('now') ORDER BY scheduleTime ASC",
+    "SELECT * FROM medicationSchedule WHERE endDate IS NULL OR endDate >= date('now') ORDER BY scheduleTime ASC",
   )
   return (result.rows?._array as MedicationSchedule[]) ?? []
 }

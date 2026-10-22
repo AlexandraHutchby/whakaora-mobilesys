@@ -29,7 +29,7 @@ const entryRow = (instructions: Record<string, unknown>, overrides = {}) => ({
   userMedicationId: 10,
   frequency: 1,
   frequencyType: "Day",
-  scheduledTimes: "",
+  scheduleTime: "",
   startDate: "2026-01-01",
   endDate: null,
   doseAmount: 500,
@@ -49,9 +49,9 @@ describe("domain objects feeding the scheduler", () => {
     })
     const entry = medicationScheduleEntry.fromRow(entryRow({ foodRule: "with" }))
     const meals = toMealSlots([
-      { id: 1, mealType: "Breakfast", scheduledTime: "08:00", enabled: 0 },
-      { id: 2, mealType: "Lunch", scheduledTime: "12:00", enabled: 1 },
-      { id: 3, mealType: "Dinner", scheduledTime: "18:00", enabled: 1 },
+      { id: 1, mealType: "Breakfast", scheduleTime: "08:00", enabled: 0 },
+      { id: 2, mealType: "Lunch", scheduleTime: "12:00", enabled: 1 },
+      { id: 3, mealType: "Dinner", scheduleTime: "18:00", enabled: 1 },
     ])
 
     const { doses, warnings } = generateSchedule([toSchedulable(userMedication, entry)], meals, [])

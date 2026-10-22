@@ -9,12 +9,7 @@ export class MealTiming {
   ) {}
 
   static fromRow(row: any): MealTiming {
-    return new MealTiming(
-      row.id,
-      row.mealType,
-      row.scheduledTime ?? null,
-      Number(row.enabled) === 1,
-    )
+    return new MealTiming(row.id, row.mealType, row.scheduleTime ?? null, Number(row.enabled) === 1)
   }
 
   get minutes(): number | null {

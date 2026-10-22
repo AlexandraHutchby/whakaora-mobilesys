@@ -47,7 +47,7 @@ export class medicationScheduleEntry {
       row.userMedicationId,
       Number(row.frequency) || 1,
       row.frequencyType ?? "Day",
-      row.scheduledTimes ? String(row.scheduledTimes).split(",").filter(Boolean) : [],
+      row.scheduleTime ? String(row.scheduleTime).split(",").filter(Boolean) : [],
       row.startDate,
       row.endDate ?? null,
       row.doseAmount,

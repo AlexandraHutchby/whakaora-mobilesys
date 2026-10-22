@@ -129,8 +129,8 @@ describe("medicationScheduleEntry.fromRow", () => {
     ["", []],
     ["08:00", ["08:00"]],
     ["08:00,,12:00", ["08:00", "12:00"]],
-  ])("splits scheduledTimes %p into %p", (scheduledTimes, expected) => {
-    expect(medicationScheduleEntry.fromRow(row({ scheduledTimes })).times).toEqual(expected)
+  ])("splits scheduleTime %p into %p", (scheduleTime, expected) => {
+    expect(medicationScheduleEntry.fromRow(row({ scheduleTime })).times).toEqual(expected)
   })
 
   it("uses null for a missing end date", () => {

@@ -45,7 +45,7 @@ export function updatePrescriptionReminder(id: number, data: PrescriptionReminde
   const setClause = fields.map((field) => `${field} = ?`).join(", ")
   const values = fields.map((field) => data[field])
 
-  db.execute(`UPDATE prescription SET ${setClause} WHERE id = ?`, [...values, id])
+  db.execute(`UPDATE prescriptionReminder SET ${setClause} WHERE id = ?`, [...values, id])
 }
 
 // ========== DELETE ==========

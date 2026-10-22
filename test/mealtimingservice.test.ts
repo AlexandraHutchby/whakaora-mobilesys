@@ -31,7 +31,7 @@ const regenerate = regenerateSchedule as jest.Mock
 const mealRow = (overrides: Record<string, unknown> = {}) => ({
   id: 1,
   mealType: "Breakfast",
-  scheduledTime: "08:00",
+  scheduleTime: "08:00",
   enabled: 1,
   ...overrides,
 })
@@ -56,9 +56,9 @@ describe("list meal timings", () => {
 
   it("sorts meals by time of day", () => {
     getAll.mockReturnValue([
-      mealRow({ id: 3, mealType: "Dinner", scheduledTime: "19:00" }),
-      mealRow({ id: 1, mealType: "Breakfast", scheduledTime: "08:00" }),
-      mealRow({ id: 2, mealType: "Lunch", scheduledTime: "13:00" }),
+      mealRow({ id: 3, mealType: "Dinner", scheduleTime: "19:00" }),
+      mealRow({ id: 1, mealType: "Breakfast", scheduleTime: "08:00" }),
+      mealRow({ id: 2, mealType: "Lunch", scheduleTime: "13:00" }),
     ])
 
     expect(listMealTimings().map((m) => m.mealType)).toEqual(["Breakfast", "Lunch", "Dinner"])
@@ -66,8 +66,8 @@ describe("list meal timings", () => {
 
   it("puts meals without a valid time last", () => {
     getAll.mockReturnValue([
-      mealRow({ id: 1, mealType: "Snack", scheduledTime: null }),
-      mealRow({ id: 2, mealType: "Breakfast", scheduledTime: "08:00" }),
+      mealRow({ id: 1, mealType: "Snack", scheduleTime: null }),
+      mealRow({ id: 2, mealType: "Breakfast", scheduleTime: "08:00" }),
     ])
 
     expect(listMealTimings().map((m) => m.mealType)).toEqual(["Breakfast", "Snack"])
@@ -106,9 +106,9 @@ describe("list meal timings", () => {
     getAll
       .mockReturnValueOnce([])
       .mockReturnValueOnce([
-        mealRow({ id: 1, mealType: "Breakfast", scheduledTime: "08:00" }),
-        mealRow({ id: 2, mealType: "Lunch", scheduledTime: "13:00" }),
-        mealRow({ id: 3, mealType: "Dinner", scheduledTime: "19:00" }),
+        mealRow({ id: 1, mealType: "Breakfast", scheduleTime: "08:00" }),
+        mealRow({ id: 2, mealType: "Lunch", scheduleTime: "13:00" }),
+        mealRow({ id: 3, mealType: "Dinner", scheduleTime: "19:00" }),
       ])
 
     expect(listMealTimings().map((m) => m.mealType)).toEqual(["Breakfast", "Lunch", "Dinner"])
