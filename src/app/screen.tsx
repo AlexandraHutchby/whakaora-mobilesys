@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-imports */
 import React from "react"
-import { useLocalSearchParams, usePathname, useSegments } from "expo-router"
+import { useLocalSearchParams } from "expo-router"
 
 import CameraScreen from "@/presentation/screens/cameraScreen"
 import CombinationScreen from "@/presentation/screens/combinationScreen"
@@ -33,19 +33,10 @@ const screenRegistry: Record<string, React.ComponentType> = {
 }
 
 export default function Screens() {
-  console.log("SCREEN.tsx is running")
   const params = useLocalSearchParams<{ destination?: string | string[] }>()
   const screenName = Array.isArray(params.destination)
     ? params.destination[0]
     : params.destination || "home"
-
-  const pathname = usePathname()
-  const segments = useSegments()
-
-  console.log("Screen parameter:", params.destination)
-  console.log("Selected screen:", screenName)
-  console.log("Pathname:", pathname)
-  console.log("Segments:", segments)
 
   const ScreenComponent = screenRegistry[screenName]
 

@@ -5,7 +5,7 @@ export type MedicationSchedule = {
   userMedicationId: number
   frequency: number
   frequencyType: string
-  scheduleTimes: string
+  scheduleTime: string
   startDate: string
   endDate: string | null
   doseAmount: number
@@ -22,14 +22,14 @@ export type MedicationScheduleUpdate = Partial<NewMedicationSchedule>
 export function addMedicationSchedule(data: NewMedicationSchedule): number {
   const result = db.execute(
     `INSERT INTO medicationSchedule
-      (userMedicationId, frequency, frequencyType, scheduleTimes,
+      (userMedicationId, frequency, frequencyType, scheduleTime,
        startDate, endDate, doseAmount, doseUnit, instructions, enabled)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.userMedicationId,
       data.frequency,
       data.frequencyType,
-      data.scheduleTimes,
+      data.scheduleTime,
       data.startDate,
       data.endDate,
       data.doseAmount,
@@ -43,19 +43,19 @@ export function addMedicationSchedule(data: NewMedicationSchedule): number {
 
 // ========== READ ==========
 export function getAllMedicationSchedule(): MedicationSchedule[] {
-  const result = db.execute("SELECT * FROM medicationSchedule ORDER BY scheduleTimes ASC")
+  const result = db.execute("SELECT * FROM medicationSchedule ORDER BY scheduleTime ASC")
   return (result.rows?._array as MedicationSchedule[]) ?? []
 }
 
 export function getCurrentMedicationSchedule(): MedicationSchedule[] {
   const result = db.execute(
-    "SELECT * FROM medicationSchedule WHERE endDate = NULL OR WHERE endDate > now() ORDER BY scheduleTimes ASC",
+    "SELECT * FROM medicationSchedule WHERE endDate IS NULL OR WHERE endDate > date('now') ORDER BY scheduleTime ASC",
   )
   return (result.rows?._array as MedicationSchedule[]) ?? []
 }
 
 // ========== UPDATE ==========
-export function updateMedicationSchedule(id: number, data: MedicationSchedule): void {
+export function updateMedicationSchedule(id: number, data: MedicationScheduleUpdate): void {
   const fields = Object.keys(data) as (keyof MedicationScheduleUpdate)[]
 
   if (fields.length === 0) return

@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-restricted-imports */
 
-import { React, useState } from "react"
+import { React, useState, useMemo } from "react"
 import {
   KeyboardAvoidingView,
   Platform,
@@ -16,40 +16,72 @@ import {
   TextInput,
   Switch,
 } from "react-native"
-import { router } from "expo-router"
-import { useLocalSearchParams } from "expo-router"
+import { router, useLocalSearchParams } from "expo-router"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { parseTime } from "@/application/domain/Scheduler"
+import {
+  listMedicationSchedules,
+  saveMedicationSchedule,
+} from "@/application/services/medicationScheduleService"
 import { saveUserMedication } from "@/application/services/medicationService"
 
-const frequencies = ["Never", "Once", "Daily", "Weekly"]
 const frequencyTypes = ["Day", "Week", "Month"]
+const doseUnits = ["mg", "ml", "tablet", "puff"]
 
 const MedScreen = () => {
-  const [dosage, setDosage] = useState("0")
-  const [frequency, setFrequency] = useState("never")
-  const [takeWithFood, setTakeWithFood] = useState(false)
-  const [takenBeforeFood, setTakenBeforeFood] = useState(false)
-  const [preferredTime, setPreferredTime] = useState("")
-  const [frequencyType, setFrequencyType] = useState("")
-
   const {
     medicationReferenceId,
     medicationName,
-    userMedicationId,
+    userMedicationId: userMedicationIdParam,
     customName: existingCustomName,
   } = useLocalSearchParams()
+
+  const userMedicationId = userMedicationIdParam ? Number(userMedicationIdParam) : undefined
+
+  const existing = useMemo(
+    () =>
+      userMedicationId
+        ? listMedicationSchedules().find((e) => e.userMedicationId === userMedicationId)
+        : undefined,
+    [userMedicationId],
+  )
+
+  const [dosage, setDosage] = useState(existing ? String(existing.doseAmount) : "")
+  const [doseUnit, setDoseUnit] = useState(existing?.doseUnit ?? "mg")
+  const [frequency, setFrequency] = useState(existing ? String(existing.frequency) : "1")
+  const [frequencyType, setFrequencyType] = useState(existing?.frequencyType ?? "Day")
+  const [foodRule, setFoodRule] = useState(existing?.instructions.foodRule ?? "none")
+  const [preferredTime, setPreferredTime] = useState(existing?.instructions.preferredTime ?? "")
+  const [error, setError] = useState(null)
 
   const originalName = String(medicationName || "")
   const [customName, setCustomName] = useState(String(existingCustomName || medicationName || ""))
 
   const completeMedication = () => {
     if (!medicationName && !userMedicationId) return
-    saveUserMedication({
-      id: userMedicationId ? Number(userMedicationId) : undefined,
+    const amount = Number(dosage)
+    const freq = Number(frequency)
+    if (!(amount > 0)) return setError("Enter a dosage amount greater than 0.")
+    if (!Number.isInteger(freq) || freq < 1) return setError("Enter how many times (1 or more).")
+    if (preferredTime.trim() && parseTime(preferredTime) === null) {
+      return setError("Preferred time must look like 08:00.")
+    }
+    setError(null)
+    const medId = saveUserMedication({
+      id: userMedicationId,
       medicationReferenceId: medicationReferenceId ? Number(medicationReferenceId) : null,
       medicationName: String(medicationName || customName),
       customName: customName.trim() || null,
+    })
+    saveMedicationSchedule({
+      userMedicationId: medId,
+      frequency: freq,
+      frequencyType,
+      doseAmount: amount,
+      doseUnit,
+      foodRule,
+      preferredTime: preferredTime.trim() || null,
     })
 
     router.replace({
@@ -99,20 +131,19 @@ const MedScreen = () => {
                 onChangeText={setDosage}
                 style={styles.input}
                 keyboardType="numeric"
-                placeholder="0"
+                placeholder="e.g. 500"
               />
 
-              {/** FREQUENCY */}
-              <Text style={styles.label}>How often?</Text>
+              <Text style={styles.label}>Unit</Text>
               <View style={styles.optionRow}>
-                {frequencies.map((option) => (
+                {doseUnits.map((option) => (
                   <TouchableOpacity
                     key={option}
-                    style={[styles.option, frequency === option && styles.optionSelected]}
-                    onPress={() => setFrequency(option)}
+                    style={[styles.option, doseUnit === option && styles.optionSelected]}
+                    onPress={() => setDoseUnit(option)}
                   >
                     <Text
-                      style={[styles.optionText, frequency === option && styles.optionTextSelected]}
+                      style={[styles.optionText, doseUnit === option && styles.optionTextSelected]}
                     >
                       {option}
                     </Text>
@@ -120,8 +151,17 @@ const MedScreen = () => {
                 ))}
               </View>
 
-              {/** FREQUENCY UNIT */}
-              <Text style={styles.label}>Frequency Unit</Text>
+              {/** FREQUENCY */}
+              <Text style={styles.label}>How many times?</Text>
+              <TextInput
+                value={frequency}
+                onChangeText={setFrequency}
+                style={styles.input}
+                keyboardType="number-pad"
+                placeholder="1"
+              />
+
+              <Text style={styles.label}>Per</Text>
               <View style={styles.optionRow}>
                 {frequencyTypes.map((option) => (
                   <TouchableOpacity
@@ -148,13 +188,19 @@ const MedScreen = () => {
               {/** WITH FOOD */}
               <View style={styles.switchRow}>
                 <Text style={styles.switchLabel}>Take with food</Text>
-                <Switch value={takeWithFood} onValueChange={setTakeWithFood} />
+                <Switch
+                  value={foodRule === "with"}
+                  onValueChange={(v) => setFoodRule(v ? "with" : "none")}
+                />
               </View>
 
               {/** BEFORE FOOD */}
               <View style={styles.switchRow}>
                 <Text style={styles.switchLabel}>Take before food</Text>
-                <Switch value={takenBeforeFood} onValueChange={setTakeWithFood} />
+                <Switch
+                  value={foodRule === "before"}
+                  onValueChange={(v) => setFoodRule(v ? "before" : "none")}
+                />
               </View>
 
               {/** PREFERRED TIME */}
@@ -167,6 +213,8 @@ const MedScreen = () => {
                 keyboardType="numbers-and-punctuation"
               />
             </View>
+
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
             <TouchableOpacity style={styles.completeButton} onPress={completeMedication}>
               <Text style={styles.completeText}>
@@ -217,6 +265,11 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 40,
+  },
+  errorText: {
+    color: "#B91C1C",
+    fontSize: 14,
+    marginBottom: 12,
   },
   flex: {
     flex: 1,

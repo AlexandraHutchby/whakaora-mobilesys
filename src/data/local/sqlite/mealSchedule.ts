@@ -14,7 +14,7 @@ export type MealScheduleUpdate = Partial<NewMealSchedule>
 // =========== CREATE ==========
 export function addMealSchedule(data: NewMealSchedule): number {
   const result = db.execute(
-    `INSERT INTO mealSchedule (mealType, scheduleTime, enabled)
+    `INSERT INTO mealSchedule (mealType, scheduledTime, enabled)
         VALUES(?,?,?)`,
     [data.mealType, data.scheduleTime, data.enabled],
   )
@@ -24,7 +24,7 @@ export function addMealSchedule(data: NewMealSchedule): number {
 
 // ========== READ ==========
 export function getAllMealSchedules(): MealSchedule[] {
-  const result = db.execute("SELECT * FROM mealSchedule ORDER BY scheduledTime ASC")
+  const result = db.execute("SELECT * FROM mealSchedule ORDER BY scheduledTime")
   return (result.rows?._array as MealSchedule[]) ?? []
 }
 

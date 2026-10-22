@@ -16,7 +16,18 @@ const MyMedsScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       {/** Back Arrow */}
-      <TouchableOpacity style={styles.backButton} activeOpacity={0.7} onPress={() => router.back()}>
+      <TouchableOpacity
+        style={styles.backButton}
+        activeOpacity={0.7}
+        onPress={() =>
+          router.push({
+            pathname: "/screen",
+            params: {
+              destination: "home",
+            },
+          })
+        }
+      >
         <Image
           source={require("../../../assets/icons/back.png")}
           style={styles.backIcon}

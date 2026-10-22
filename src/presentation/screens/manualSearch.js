@@ -10,6 +10,8 @@ import { SafeAreaView } from "react-native-safe-area-context"
 
 import { useMedicationReferenceList } from "../hooks/useMedicationReferenceList"
 
+const MAX_RESULT = 20
+
 const ManualSearchScreen = () => {
   const { medications, query, setQuery } = useMedicationReferenceList()
 
@@ -27,6 +29,8 @@ const ManualSearchScreen = () => {
       return category.keywords.some((keyword) => use.includes(keyword))
     }),
   )
+
+  const visibleMedications = useMemo(() => medications.slice(0, MAX_RESULT), [medications])
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -90,7 +94,7 @@ const ManualSearchScreen = () => {
       </View> */}
 
       <FlatList
-        data={medications}
+        data={visibleMedications}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
