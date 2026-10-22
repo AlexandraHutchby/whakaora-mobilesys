@@ -6,25 +6,36 @@ import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-c
 
 import rawMedicationData from "@/data/local/medications.json"
 import { initialiseDatabase } from "@/data/local/sqlite/create_database"
+import db from "@/data/local/sqlite/database"
 import {
   countMedicationReferences,
   importMedicationReferences,
 } from "@/data/local/sqlite/medicationReference"
+import { resetDatabase } from "@/data/local/sqlite/resetDatabase"
 import { initI18n } from "@/i18n"
 import { ThemeProvider } from "@/theme/context"
 import { customFontsToLoad } from "@/theme/typography"
 import { loadDateFnsLocale } from "@/utils/formatDate"
 
+console.log("layout module loaded")
 SplashScreen.preventAutoHideAsync()
+
+for (const t of ["mealSchedule", "medicationSchedule", "interactionRecord"]) {
+  const cols = db.execute(`PRAGMA table_info(${t})`).rows?._array?.map((c) => c.name)
+  console.log("SCHEMA", t, JSON.stringify(cols))
+}
 
 if (__DEV__) {
   // Load Reactotron configuration in development. We don't want to
   // include this in our production bundle, so we are using `if (__DEV__)`
   // to only execute this in development.
+  console.log("before Reactotron")
   require("@/devtools/ReactotronConfig")
+  console.log("after Reactotron")
 }
 
 export default function Root() {
+  console.log("Root rendered")
   type MedicationImportRecord = {
     medication_name: string
     common_names?: unknown
@@ -40,9 +51,13 @@ export default function Root() {
   const medicationData = rawMedicationData as unknown as MedicationImportRecord[]
 
   useEffect(() => {
+    console.log("database effect started")
     try {
+      resetDatabase()
+      console.log("initialising database")
       initialiseDatabase()
       if (countMedicationReferences() === 0) {
+        console.log("creating medications")
         for (const item of medicationData) {
           importMedicationReferences([item])
         }

@@ -18,7 +18,7 @@ export function addReminder(data: Reminder): number {
   const result = db.execute(
     `INSERT INTO reminder
         (scheduleId, reminderDateTime, reminderType, enabled, snoozeDuration) VALUES
-        (?, ?, ?,?,?,)`,
+        (?, ?, ?, ?, ?)`,
     [data.scheduleId, data.reminderDateTime, data.reminderType, data.enabled, data.snoozeDuration],
   )
   return result.insertId as number

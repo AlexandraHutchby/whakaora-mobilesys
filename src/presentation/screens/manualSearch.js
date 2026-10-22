@@ -10,6 +10,8 @@ import { SafeAreaView } from "react-native-safe-area-context"
 
 import { useMedicationReferenceList } from "../hooks/useMedicationReferenceList"
 
+const MAX_RESULT = 20
+
 const ManualSearchScreen = () => {
   const { medications, query, setQuery } = useMedicationReferenceList()
 
@@ -27,6 +29,8 @@ const ManualSearchScreen = () => {
       return category.keywords.some((keyword) => use.includes(keyword))
     }),
   )
+
+  const visibleMedications = useMemo(() => medications.slice(0, MAX_RESULT), [medications])
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -90,7 +94,7 @@ const ManualSearchScreen = () => {
       </View> */}
 
       <FlatList
-        data={medications}
+        data={visibleMedications}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
@@ -143,12 +147,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
-  // sectionTitle: {
-  //   color: "#135348",
-  //   fontSize: 18,
-  //   fontWeight: "600",
-  //   marginBottom: 8,
-  // },
   title: {
     color: "#135348",
     fontSize: 50,
@@ -157,25 +155,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: "center",
   },
-  // useBox: {
-  //   backgroundColor: "#EAF7F5",
-  //   borderRadius: 10,
-  //   marginBottom: 8,
-  //   marginRight: 8,
-  //   paddingHorizontal: 10,
-  //   paddingVertical: 8,
-  // },
-  // useBoxGrid: {
-  //   flexDirection: "row",
-  //   flexWrap: "wrap",
-  //   gap: 8,
-  //   marginBottom: 16,
-  // },
-  // useBoxText: {
-  //   color: "#135348",
-  //   fontSize: 12,
-  //   fontWeight: "600",
-  // },
 })
 
 export default ManualSearchScreen

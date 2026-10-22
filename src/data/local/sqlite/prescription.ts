@@ -42,7 +42,7 @@ export function getAllPrescriptions(): Prescription[] {
 
 export function getCurrentPrescriptions(): Prescription[] {
   const result = db.execute(
-    "SELECT * FROM prescription WHERE status = current ORDER BY userMedicationId ASC",
+    "SELECT * FROM prescription WHERE status = 1 ORDER BY userMedicationId ASC",
   )
   return (result.rows?._array as Prescription[]) ?? []
 }

@@ -28,7 +28,7 @@ export function initialiseDatabase() {
         CREATE TABLE IF NOT EXISTS mealSchedule (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             mealType TEXT NOT NULL,
-            scheduledTime TEXT,
+            scheduleTime TEXT,
             enabled INTEGER NOT NULL
         );
     `)
@@ -39,7 +39,7 @@ export function initialiseDatabase() {
             userMedicationId INTEGER NOT NULL,
             frequency INT NOT NULL,
             frequencyType TEXT NOT NULL,
-            scheduleTimes TEXT NOT NULL,
+            scheduleTime TEXT NOT NULL,
             startDate TEXT NOT NULL,
             endDate TEXT,
             doseAmount INTEGER NOT NULL,

@@ -24,7 +24,7 @@ export function addMealSchedule(data: NewMealSchedule): number {
 
 // ========== READ ==========
 export function getAllMealSchedules(): MealSchedule[] {
-  const result = db.execute("SELECT * FROM mealSchedule ORDER BY scheduledTime ASC")
+  const result = db.execute("SELECT * FROM mealSchedule ORDER BY scheduleTime")
   return (result.rows?._array as MealSchedule[]) ?? []
 }
 

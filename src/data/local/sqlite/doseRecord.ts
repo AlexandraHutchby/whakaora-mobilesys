@@ -4,7 +4,7 @@ export type DoseRecord = {
   id: number
   scheduleId: number
   scheduleDateTime: string
-  actualTimeTaken: string
+  actualTakenDateTime: string
   status: string
 }
 
@@ -16,22 +16,22 @@ export type DoseRecordUpdate = Partial<NewDoseRecord>
 export function addDoseRecord(data: DoseRecord): number {
   const result = db.execute(
     `INSERT INTO doseRecord
-        (scheduleId, scheduleDateTime, actualTimeTaken, status) VALUES
+        (scheduleId, scheduleDateTime, actualTakenDateTime, status) VALUES
         (?, ?, ?,?)`,
-    [data.scheduleId, data.scheduleDateTime, data.actualTimeTaken, data.status],
+    [data.scheduleId, data.scheduleDateTime, data.actualTakenDateTime, data.status],
   )
   return result.insertId as number
 }
 
 // ========== READ ==========
 export function getAllDoseRecords(): DoseRecord[] {
-  const result = db.execute("SELECT * FROM doseRecords ORDER BY scheduleDateTime DES")
+  const result = db.execute("SELECT * FROM doseRecord ORDER BY scheduleDateTime DESC")
   return (result.rows?._array as DoseRecord[]) ?? []
 }
 
 export function getMissedDoses(): DoseRecord[] {
   const result = db.execute(
-    "SELECT * FROM doseRecord WHERE scheduleDateTime != actualTimeTaken ORDER BY scheduleDateTime DES",
+    "SELECT * FROM doseRecord WHERE scheduleDateTime != actualTakenDateTime ORDER BY scheduleDateTime DESC",
   )
   return (result.rows?._array as DoseRecord[]) ?? []
 }

@@ -18,7 +18,7 @@ export function addInteractionRecord(data: InteractionRecord): number {
   const result = db.execute(
     `INSERT INTO interactionRecord
         (userMedicationId, interactingMedicationId, description, notes, dateRecorded) VALUES
-        (?, ?, ?,?,?,)`,
+        (?, ?, ?, ?, ?)`,
     [
       data.userMedicationId,
       data.interactingMedicationId,
@@ -37,7 +37,7 @@ export function getAllInteractionRecords(): InteractionRecord[] {
 }
 
 // ========== UPDATE ==========
-export function updateInteractionRecords(id: number, data: InteractionRecord): void {
+export function updateInteractionRecords(id: number, data: InteractionRecordUpdate): void {
   const fields = Object.keys(data) as (keyof InteractionRecordUpdate)[]
 
   if (fields.length === 0) return
