@@ -41,7 +41,7 @@ export function parseTime(t: string | null | undefined): number | null {
 }
 
 export function formatTime(minutes: number): string {
-  const m = ((Math.round(minutes) % DAY) + DAY) & DAY
+  const m = ((Math.round(minutes) % DAY) + DAY) % DAY
   return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`
 }
 

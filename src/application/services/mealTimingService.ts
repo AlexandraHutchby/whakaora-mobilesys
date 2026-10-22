@@ -15,14 +15,15 @@ const DEFAULT_MEALS = [
 ]
 
 export function listMealTimings(): MealTiming[] {
-  const rows = getAllMealSchedules()
+  let rows = getAllMealSchedules()
   if (rows.length === 0) {
-    DEFAULT_MEALS.forEach((m) =>
+    DEFAULT_MEALS.forEach((m) => {
       addMealSchedule({
         ...m,
         enabled: 1,
-      }),
-    )
+      })
+    })
+    rows = getAllMealSchedules()
   }
   return rows.map(MealTiming.fromRow).sort((a, b) => (a.minutes ?? 9999) - (b.minutes ?? 9999))
 }
