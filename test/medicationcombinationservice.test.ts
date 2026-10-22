@@ -8,10 +8,7 @@ import {
   removeCombination,
   removeCombinationsForMedication,
 } from "../src/application/services/combinationService"
-import {
-  regenerateSchedule,
-  removeSchedulesForMedication,
-} from "../src/application/services/medicationScheduleService"
+import { regenerateSchedule } from "../src/application/services/medicationScheduleService"
 import {
   addInteractionRecord,
   deleteInteractionRecord,
