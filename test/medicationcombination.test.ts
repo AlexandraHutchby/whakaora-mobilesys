@@ -59,14 +59,14 @@ describe("MedicationCombination.involves", () => {
   })
 })
 
-describe("Medication Combination.otherMedicationIs", () => {
+describe("Medication Combination.otherMedicationId", () => {
   const combo = MedicationCombination.fromRow(row())
 
   it("returns the interacting medication when given the user medication", () => {
-    expect(combo.otherMedicationIs(10)).toBe(20)
+    expect(combo.otherMedicationId(10)).toBe(20)
   })
 
   it("returns the user medication when given the interacting medication", () => {
-    expect(combo.otherMedicationIs(20)).toBe(10)
+    expect(combo.otherMedicationId(20)).toBe(10)
   })
 })

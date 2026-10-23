@@ -23,7 +23,7 @@ export class MedicationCombination {
     return this.userMedicationId === medicationId || this.interactingMedicationId === medicationId
   }
 
-  otherMedicationIs(medicationId: number): number {
+  otherMedicationId(medicationId: number): number {
     return this.userMedicationId === medicationId
       ? this.interactingMedicationId
       : this.userMedicationId
