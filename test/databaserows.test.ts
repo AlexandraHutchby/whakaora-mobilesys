@@ -133,7 +133,7 @@ describe("MedicationCombination reading an interactionRecord row", () => {
     const combination = MedicationCombination.fromRow(getAllInteractionRecords()[0])
 
     expect(combination.involves(first)).toBe(true)
-    expect(combination.otherMedicationIs(first)).toBe(second)
+    expect(combination.otherMedicationId(first)).toBe(second)
     expect(combination.description).toBeNull()
     expect(combination.notes).toBe("Space doses")
     expect(combination.dateRecorded).toBe("2026-03-15T10:00:00.000Z")

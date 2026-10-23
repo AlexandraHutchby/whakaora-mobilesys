@@ -1,0 +1,568 @@
+classDiagram
+    direction LR
+
+    %% Domain
+    class MealTiming {
+        <<domain>>
+        +number id
+        +string mealType
+        +string|null scheduleTime
+        +boolean enabled
+        +fromRow(row) MealTiming
+        +minutes number|null
+        +isUsable boolean
+    }
+
+    class UserMedication {
+        <<domain>>
+        +number id
+        +string medicationName
+        +number|null medicationReferenceId
+        +string|null customName
+        +fromRow(row) UserMedication
+        +displayName string
+        +isLinkedToReference() boolean
+    }
+
+    class MedicationReferenceDomain {
+        <<domain>>
+        +number id
+        +string medicationName
+        +string commonName
+        +string commonUse
+        +string contraIndication
+        +string cautions
+        +string sideEffects
+        +string patientAdvice
+        +displayName string
+        +fromRow(row) MedicationReferenceDomain
+        +toRow() object
+    }
+
+    class MedicationCombination {
+        <<domain>>
+        +number id
+        +number userMedicationId
+        +number interactingMedicationId
+        +string|null description
+        +string|null notes
+        +string dateRecorded
+        +fromRow(row) MedicationCombination
+        +involves(medicationId) boolean
+        +otherMedicationId(medicationId) number
+    }
+
+    class MedicationScheduleEntry {
+        <<domain>>
+        +number id
+        +number userMedicationId
+        +number frequency
+        +string frequencyType
+        +string[] times
+        +string startDate
+        +string|null endDate
+        +number doseAmount
+        +string doseUnit
+        +ParsedInstructions instructions
+        +boolean enabled
+        +fromRow(row) medicationScheduleEntry
+        +dosesPerDay number
+        +intervalDays number
+        +isActiveOn(isoDate) boolean
+    }
+
+    class ParsedInstructions {
+        <<type>>
+        +FoodRule foodRule
+        +string|null preferredTime
+        +string|null notes
+    }
+
+    class InstructionParser {
+        <<module>>
+        +parseInstructions(raw) ParsedInstructions
+        +seraliseInstructions(instructions) string
+    }
+
+    %% Scheduler value types and module
+    class FoodRule {
+        <<enum>>
+        none
+        with
+        before
+        after
+    }
+
+    class MealSlot {
+        <<type>>
+        +string mealType
+        +number minutes
+    }
+
+    class SchedulableMedication {
+        <<type>>
+        +number userMedicationId
+        +string name
+        +number dosesPerDay
+        +number intervalDays
+        +FoodRule foodRule
+        +number|null preferredMinutes
+    }
+
+    class SuggestedDose {
+        <<type>>
+        +number userMedicationId
+        +string name
+        +number minutes
+        +string time
+        +number intervalDays
+        +string reason
+    }
+
+    class ScheduleResult {
+        <<type>>
+        +SuggestedDose[] doses
+        +string[] warnings
+    }
+
+    class Scheduler {
+        <<module>>
+        +parseTime(time) number|null
+        +formatTime(minutes) string
+        +generateSchedule(meds, meals, conflicts) ScheduleResult
+        -foodOffset(rule) number
+        -idealTimes(med, meals) number[]
+        -candidateTimes(target, med, meals) number[]
+        -describe(med, minutes, meals) string
+    }
+
+    %% Service input and output types
+    class SaveScheduleInput {
+        <<type>>
+        +number id
+        +number userMedicationId
+        +number frequency
+        +string frequencyType
+        +number doseAmount
+        +string doseUnit
+        +FoodRule foodRule
+        +string|null preferredTime
+        +string|null notes
+        +string startDate
+        +string|null endDate
+    }
+
+    class Category {
+        <<type>>
+        +string label
+        +MedicationReferenceDomain[] medications
+    }
+
+    %% SQLite row types
+    class MealScheduleRow {
+        <<SQLite row>>
+        +number id
+        +string mealType
+        +string|null scheduleTime
+        +number enabled
+    }
+
+    class UserMedicationRow {
+        <<SQLite row>>
+        +number id
+        +number|null medicationReferenceId
+        +string medicationName
+        +string|null customName
+    }
+
+    class MedicationReferenceRow {
+        <<SQLite row>>
+        +number id
+        +string medicationName
+        +string|null commonName
+        +string|null commonUse
+        +string|null contraIndication
+        +string|null cautions
+        +string|null sideEffects
+        +string|null patientAdvice
+    }
+
+    class MedicationScheduleRow {
+        <<SQLite row>>
+        +number id
+        +number userMedicationId
+        +number frequency
+        +string frequencyType
+        +string scheduleTime
+        +string startDate
+        +string|null endDate
+        +number doseAmount
+        +string doseUnit
+        +string|null instructions
+        +string enabled
+    }
+
+    class InteractionRecord {
+        <<SQLite row>>
+        +number id
+        +number userMedicationId
+        +number interactingMedicationId
+        +string|null description
+        +string|null notes
+        +string dateRecorded
+    }
+
+    class DoseRecord {
+        <<SQLite row>>
+        +number id
+        +number scheduleId
+        +string scheduleDateTime
+        +string actualTakenDateTime
+        +string status
+    }
+
+    class ReminderRecord {
+        <<SQLite row>>
+        +number id
+        +number scheduleId
+        +string|null reminderDateTime
+        +string|null reminderType
+        +number enabled
+        +number|null snoozeDuration
+    }
+
+    class PrescriptionRecord {
+        <<SQLite row>>
+        +number id
+        +number userMedicationId
+        +number quantityReceived
+        +number|null repeatCount
+        +string|null expiryDate
+        +string|null nextPrescriptionDate
+        +number|null reminderLeadTime
+        +number status
+    }
+
+    class PrescriptionReminderRecord {
+        <<SQLite row>>
+        +number id
+        +number prescriptionId
+        +string reminderDate
+        +number|null leadTime
+        +number enabled
+    }
+
+    class SideEffectRecord {
+        <<SQLite row>>
+        +number id
+        +number userMedicationId
+        +string dateRecorded
+        +string|null description
+    }
+
+    %% Database modules represented as repository-like modules
+    class DatabaseConnection {
+        <<SQLite connection>>
+        +execute(sql, params) ExecuteResult
+    }
+
+    class DatabaseInitialiser {
+        <<module>>
+        +initialiseDatabase() void
+    }
+
+    class DatabaseReset {
+        <<module>>
+        +resetDatabase() void
+        +wipeDatabase() void
+    }
+
+    class MealScheduleRepository {
+        <<SQLite module>>
+        +addMealSchedule(data) number
+        +getAllMealSchedules() MealScheduleRow[]
+        +getMealScheduleById(id) MealScheduleRow|null
+        +getMealScheduleByType(mealType) MealScheduleRow[]
+        +updateMealSchedule(id, data) void
+        +deleteMealSchedule(id) void
+    }
+
+    class UserMedicationRepository {
+        <<SQLite module>>
+        +addUserMedication(data) number
+        +getAllUserMedications() UserMedicationRow[]
+        +getUserMedicationById(id) UserMedicationRow|null
+        +getUserMedicationWithReference(id) object|null
+        +userMedicationExists(referenceId) boolean
+        +updateUserMedication(id, data) void
+        +deleteUserMedication(id) void
+    }
+
+    class MedicationReferenceRepository {
+        <<SQLite module>>
+        +addMedicationReference(data) number
+        +importMedicationReferences(records) void
+        +getAllMedicationReferences() MedicationReferenceRow[]
+        +getMedicationReferenceById(id) MedicationReferenceRow|null
+        +searchMedicationReferencesByName(query) MedicationReferenceRow[]
+        +searchMedicationReferencesByUse(commonUse) MedicationReferenceRow[]
+        +countMedicationReferences() number
+        +updateMedicationReference(id, data) void
+        +deleteMedicationReference(id) void
+    }
+
+    class MedicationScheduleRepository {
+        <<SQLite module>>
+        +addMedicationSchedule(data) number
+        +getAllMedicationSchedule() MedicationScheduleRow[]
+        +getCurrentMedicationSchedule() MedicationScheduleRow[]
+        +updateMedicationSchedule(id, data) void
+        +deleteMedicationSchedule(id) void
+    }
+
+    class InteractionRecordRepository {
+        <<SQLite module>>
+        +addInteractionRecord(data) number
+        +getAllInteractionRecords() InteractionRecord[]
+        +updateInteractionRecords(id, data) void
+        +deleteInteractionRecord(id) void
+    }
+
+    class DoseRecordRepository {
+        <<SQLite module>>
+        +addDoseRecord(data) number
+        +getAllDoseRecords() DoseRecord[]
+        +getMissedDoses() DoseRecord[]
+        +updateDoseRecord(id, data) void
+        +deleteDoseRecord(id) void
+    }
+
+    class ReminderRepository {
+        <<SQLite module>>
+        +addReminder(data) number
+        +getAllReminders() ReminderRecord[]
+        +getCurrentReminders() ReminderRecord[]
+        +updateReminder(id, data) void
+        +deleteReminder(id) void
+    }
+
+    class PrescriptionRepository {
+        <<SQLite module>>
+        +addPrescription(data) number
+        +getAllPrescriptions() PrescriptionRecord[]
+        +getCurrentPrescriptions() PrescriptionRecord[]
+        +updatePrescription(id, data) void
+        +deletePrescription(id) void
+    }
+
+    class PrescriptionReminderRepository {
+        <<SQLite module>>
+        +addPrescriptionReminder(data) number
+        +getAllPrescriptionReminders() PrescriptionReminderRecord[]
+        +getCurrentPrescriptionReminders() PrescriptionReminderRecord[]
+        +updatePrescriptionReminder(id, data) void
+        +deletePrescriptionReminder(id) void
+    }
+
+    class SideEffectRecordRepository {
+        <<SQLite module>>
+        +addSideEffectRecord(data) number
+        +getAllSideEffectRecords() SideEffectRecord[]
+        +getRecentSideEffectRecords(dateRecorded) SideEffectRecord[]
+        +updateSideEffectRecord(id, data) void
+        +deleteSideEffectRecord(id) void
+    }
+
+    %% Application services
+    class MealTimingService {
+        <<service>>
+        -DEFAULT_MEALS
+        +listMealTimings() MealTiming[]
+        +saveMealTime(id, time) boolean
+        +setMealEnabled(id, enabled) void
+        +createMealTiming(mealType, time) boolean
+    }
+
+    class MedicationService {
+        <<service>>
+        +listUserMedications() UserMedication[]
+        +createUserMedication(data) number|null
+        +saveUserMedication(data) number
+        +removeUserMedication(id) void
+    }
+
+    class MedicationReferenceService {
+        <<service>>
+        -CATEGORY_KEYWORDS
+        +getAllMedicationReferenceRows() MedicationReferenceDomain[]
+        +searchMedicationReferenceRowsByName(term) MedicationReferenceDomain[]
+        +getMedicationReferenceRowsById(id) MedicationReferenceDomain|null
+        +getMedicationReferenceByType(commonUse) MedicationReferenceDomain[]
+        +getMedicationCategories() Category[]
+    }
+
+    class CombinationService {
+        <<service>>
+        +listCombinations() MedicationCombination[]
+        +getCombinationsFor(medicationId) MedicationCombination[]
+        +addCombination(userMedicationId, interactingMedicationId, description, notes) number|null
+        +removeCombination(id) void
+        +removeCombinationsForMedication(medicationId) void
+    }
+
+    class MedicationScheduleService {
+        <<service>>
+        +listMedicationSchedules() MedicationScheduleEntry[]
+        +previewSchedule() ScheduleResult
+        +regenerateSchedule() ScheduleResult
+        +saveMedicationSchedule(input) number
+        +setScheduleEnabled(id, enabled) void
+        +removeMedicationSchedule(id) void
+        +removeSchedulesForMedication(userMedicationId) void
+    }
+
+    %% Presentation hooks
+    class useMealTimings {
+        <<React hook>>
+        +meals MealTiming[]
+        +setTime(id, time) boolean
+        +setEnabled(id, enabled) void
+        +addMeal(mealType, time) boolean
+    }
+
+    class useMedicationList {
+        <<React hook>>
+        +medications UserMedication[]
+        +deleteMedication(id) void
+    }
+
+    class useMedicationReferenceList {
+        <<React hook>>
+        +medications MedicationReferenceDomain[]
+        +query string
+        +selected MedicationReferenceDomain|null
+        +loading boolean
+        +error Error|null
+        +setQuery(query) void
+        +select(id) void
+        +clearSelection() void
+        +refresh() void
+    }
+
+    class useMedicationSchedule {
+        <<React hook>>
+        +entries MedicationScheduleEntry[]
+        +suggested ScheduleResult
+        +save(input) number
+        +remove(id) void
+        +toggle(id, enabled) void
+        +regenerate() void
+        +refresh() void
+    }
+
+    class useCombinations {
+        <<React hook>>
+        +combinations MedicationCombination[]
+        +add(a, b, description, notes) number|null
+        +remove(id) void
+    }
+
+    %% Domain and value relationships
+    MealScheduleRow --> MealTiming : mapped to
+    UserMedicationRow --> UserMedication : mapped to
+    MedicationReferenceRow --> MedicationReferenceDomain : mapped to
+    MedicationScheduleRow --> MedicationScheduleEntry : mapped to
+    InteractionRecord --> MedicationCombination : mapped to
+
+    MedicationScheduleEntry *-- ParsedInstructions : contains
+    ParsedInstructions --> FoodRule : contains
+    SaveScheduleInput --> FoodRule : contains
+    SchedulableMedication --> FoodRule : contains
+    MedicationScheduleEntry ..> InstructionParser : parses
+    MedicationScheduleService ..> InstructionParser : serialises
+
+    MedicationReferenceDomain ..> MedicationReferenceRow : maps from and to
+    UserMedication --> MedicationReferenceDomain : may reference
+    MedicationCombination --> UserMedication : links two medications
+    MedicationScheduleEntry --> UserMedication : belongs to
+
+    MealTiming --> MealSlot : converted to
+    Scheduler ..> SchedulableMedication : accepts
+    Scheduler ..> MealSlot : accepts
+    Scheduler ..> SuggestedDose : creates
+    Scheduler ..> ScheduleResult : returns
+    ScheduleResult *-- SuggestedDose : contains
+
+    %% Record relationships
+    MedicationScheduleRow --> UserMedicationRow : references
+    InteractionRecord --> UserMedicationRow : references two medications
+    DoseRecord --> MedicationScheduleRow : references
+    ReminderRecord --> MedicationScheduleRow : references
+    PrescriptionRecord --> UserMedicationRow : references
+    PrescriptionReminderRecord --> PrescriptionRecord : references
+    SideEffectRecord --> UserMedicationRow : references
+
+    %% Database relationships
+    DatabaseInitialiser ..> DatabaseConnection : creates tables
+    DatabaseReset ..> DatabaseConnection : resets tables
+
+    MealScheduleRepository ..> DatabaseConnection : executes SQL
+    UserMedicationRepository ..> DatabaseConnection : executes SQL
+    MedicationReferenceRepository ..> DatabaseConnection : executes SQL
+    MedicationScheduleRepository ..> DatabaseConnection : executes SQL
+    InteractionRecordRepository ..> DatabaseConnection : executes SQL
+    DoseRecordRepository ..> DatabaseConnection : executes SQL
+    ReminderRepository ..> DatabaseConnection : executes SQL
+    PrescriptionRepository ..> DatabaseConnection : executes SQL
+    PrescriptionReminderRepository ..> DatabaseConnection : executes SQL
+    SideEffectRecordRepository ..> DatabaseConnection : executes SQL
+
+    MealScheduleRepository ..> MealScheduleRow : reads and writes
+    UserMedicationRepository ..> UserMedicationRow : reads and writes
+    MedicationReferenceRepository ..> MedicationReferenceRow : reads and writes
+    MedicationScheduleRepository ..> MedicationScheduleRow : reads and writes
+    InteractionRecordRepository ..> InteractionRecord : reads and writes
+    DoseRecordRepository ..> DoseRecord : reads and writes
+    ReminderRepository ..> ReminderRecord : reads and writes
+    PrescriptionRepository ..> PrescriptionRecord : reads and writes
+    PrescriptionReminderRepository ..> PrescriptionReminderRecord : reads and writes
+    SideEffectRecordRepository ..> SideEffectRecord : reads and writes
+
+    %% Service relationships
+    MealTimingService ..> MealScheduleRepository : reads and writes
+    MealTimingService ..> MealTiming : creates
+    MealTimingService ..> MedicationScheduleService : regenerates schedule
+
+    MedicationService ..> UserMedicationRepository : reads and writes
+    MedicationService ..> UserMedication : creates
+
+    MedicationReferenceService ..> MedicationReferenceRepository : reads
+    MedicationReferenceService ..> MedicationReferenceDomain : creates
+    MedicationReferenceService ..> Category : creates
+
+    CombinationService ..> InteractionRecordRepository : reads and writes
+    CombinationService ..> MedicationCombination : creates
+    CombinationService ..> MedicationScheduleService : regenerates schedule
+
+    MedicationScheduleService ..> MedicationScheduleRepository : reads and writes
+    MedicationScheduleService ..> UserMedicationRepository : reads medications
+    MedicationScheduleService ..> MealScheduleRepository : reads meals
+    MedicationScheduleService ..> InteractionRecordRepository : reads conflicts
+    MedicationScheduleService ..> MedicationScheduleEntry : creates
+    MedicationScheduleService ..> MealTiming : creates
+    MedicationScheduleService ..> SchedulableMedication : creates
+    MedicationScheduleService ..> Scheduler : generates schedules
+    MedicationScheduleService ..> ScheduleResult : returns
+
+    %% Hook relationships
+    useMealTimings ..> MealTimingService : calls
+    useMealTimings ..> MealTiming : exposes
+    useMedicationList ..> MedicationService : calls
+    useMedicationList ..> UserMedication : exposes
+    useMedicationReferenceList ..> MedicationReferenceService : calls
+    useMedicationReferenceList ..> MedicationReferenceDomain : exposes
+    useMedicationSchedule ..> MedicationScheduleService : calls
+    useMedicationSchedule ..> MedicationScheduleEntry : exposes
+    useMedicationSchedule ..> ScheduleResult : exposes
+    useCombinations ..> CombinationService : calls
+    useCombinations ..> MedicationCombination : exposes
