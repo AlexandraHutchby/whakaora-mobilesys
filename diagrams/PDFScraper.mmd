@@ -1,0 +1,8 @@
+flowchart LR
+    A[Open PDF] --> B[Get Headers]
+    B[Get Headers] --> C[Find Medications] 
+    C[Find Medications] --> D[Connect to a Reference] 
+    D[Connect to a Reference] --> E[Grab all information]
+    E[Grab all information] --> F[Grab all brand names]
+    F[Grab all brand names] --> G[Extract Sections]
+    G[Extract Sections] --> H[Save to Json]
