@@ -1,0 +1,108 @@
+classDiagram
+    direction LR
+
+    %% Domain
+    class MealTiming {
+        <<domain>>
+        +number id
+        +string mealType
+        +string|null scheduleTime
+        +boolean enabled
+        +fromRow(row) MealTiming
+        +minutes number|null
+        +isUsable boolean
+    }
+
+    class MedicationCombination {
+        <<domain>>
+        +number id
+        +number userMedicationId
+        +number interactingMedicationId
+        +string|null description
+        +string|null notes
+        +string dateRecorded
+        +fromRow(row) MedicationCombination
+        +involves(medicationId) boolean
+        +otherMedicationId(medicationId) number
+    }
+
+    class MedicationScheduleEntry {
+        <<domain>>
+        +number id
+        +number userMedicationId
+        +number frequency
+        +string frequencyType
+        +string[] times
+        +string startDate
+        +string|null endDate
+        +number doseAmount
+        +string doseUnit
+        +ParsedInstructions instructions
+        +boolean enabled
+        +fromRow(row) medicationScheduleEntry
+        +dosesPerDay number
+        +intervalDays number
+        +isActiveOn(isoDate) boolean
+    }
+
+    %% Scheduler value types and module
+    class FoodRule {
+        <<enum>>
+        none
+        with
+        before
+        after
+    }
+
+    class MealSlot {
+        <<type>>
+        +string mealType
+        +number minutes
+    }
+
+    class SchedulableMedication {
+        <<type>>
+        +number userMedicationId
+        +string name
+        +number dosesPerDay
+        +number intervalDays
+        +FoodRule foodRule
+        +number|null preferredMinutes
+    }
+
+    class SuggestedDose {
+        <<type>>
+        +number userMedicationId
+        +string name
+        +number minutes
+        +string time
+        +number intervalDays
+        +string reason
+    }
+
+    class ScheduleResult {
+        <<type>>
+        +SuggestedDose[] doses
+        +string[] warnings
+    }
+
+    class Scheduler {
+        <<module>>
+        +parseTime(time) number|null
+        +formatTime(minutes) string
+        +generateSchedule(meds, meals, conflicts) ScheduleResult
+        -foodOffset(rule) number
+        -idealTimes(med, meals) number[]
+        -candidateTimes(target, med, meals) number[]
+        -describe(med, minutes, meals) string
+    }
+
+    SchedulableMedication --> FoodRule : contains
+
+    MealTiming --> MealSlot : converted to
+    Scheduler ..> SchedulableMedication : accepts
+    Scheduler ..> MealSlot : accepts
+    Scheduler ..> SuggestedDose : creates
+    Scheduler ..> ScheduleResult : returns
+    ScheduleResult *-- SuggestedDose : contains
+

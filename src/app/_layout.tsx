@@ -11,13 +11,13 @@ import {
   countMedicationReferences,
   importMedicationReferences,
 } from "@/data/local/sqlite/medicationReference"
-import { resetDatabase } from "@/data/local/sqlite/resetDatabase"
 import { initI18n } from "@/i18n"
 import { ThemeProvider } from "@/theme/context"
 import { customFontsToLoad } from "@/theme/typography"
 import { loadDateFnsLocale } from "@/utils/formatDate"
+import { markStartup } from "@/utils/performanceLogger"
 
-console.log("layout module loaded")
+markStartup("JavaScript bundle loaded")
 SplashScreen.preventAutoHideAsync()
 
 for (const t of ["mealSchedule", "medicationSchedule", "interactionRecord"]) {
@@ -35,7 +35,7 @@ if (__DEV__) {
 }
 
 export default function Root() {
-  console.log("Root rendered")
+  markStartup("root rendered")
   type MedicationImportRecord = {
     medication_name: string
     common_names?: unknown
@@ -51,16 +51,15 @@ export default function Root() {
   const medicationData = rawMedicationData as unknown as MedicationImportRecord[]
 
   useEffect(() => {
-    console.log("database effect started")
+    markStartup("database initialisation started")
     try {
-      resetDatabase()
-      console.log("initialising database")
       initialiseDatabase()
       if (countMedicationReferences() === 0) {
-        console.log("creating medications")
+        markStartup("medication import started")
         for (const item of medicationData) {
           importMedicationReferences([item])
         }
+        markStartup("medication import completed")
       }
     } catch (error) {
       console.log("Error initialising database:", error)
@@ -78,7 +77,9 @@ export default function Root() {
 
   useEffect(() => {
     if (loaded) {
+      markStartup("fonts and internationalisation ready")
       SplashScreen.hideAsync()
+      markStartup("splash screen hide requested")
     }
   }, [loaded])
 
